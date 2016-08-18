@@ -1,0 +1,45 @@
+<!DOCTYPE HTML>
+<head><title>convex tangrams - possible sequences of pieces</title></head>
+<html>
+<body>
+	<p>possible sequences to put tangram pieces (assuming we always start with the square 'q')</p>
+	<div id="result"></div> 
+	<script>
+	var count = 0;
+	function toString(a) {
+		var s = '';
+		for(var i = 0; i < a.length; i++) {
+			s = s + a[i];
+		}
+		return s;
+	}
+	// setP - already set pieces, oP: open pieces, to be set
+	function combine(setP, oP) {
+		if( oP.length <= 1 ) {
+			document.write("<p>"+count+": "+toString(setP)+toString(oP)+"</p>");
+			count++;
+		}
+		else {
+			var processed = [];
+			for(var i = 0; i < oP.length; i++) {
+				if(!processed.includes(oP[i])) {
+				ns = setP.slice();
+				ns.push(oP[i]);
+				no = oP.slice();
+				no.splice(i, 1);
+				combine(ns, no);
+				processed.push(oP[i]);
+				}
+			}
+		}
+	}
+
+	var s = [ 'q' ];
+	var o = [ 's', 's', 'l', 'l', 'm', 'p' ];
+
+	console.log("find:"+o.includes('l'));
+	
+	combine(s, o);
+	</script>
+</body>
+</html>
