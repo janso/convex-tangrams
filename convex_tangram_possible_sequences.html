@@ -1,35 +1,37 @@
 <!DOCTYPE HTML>
 <head><title>convex tangrams - possible sequences of pieces</title></head>
 <html>
-<body>
-	<p>possible sequences to put tangram pieces (assuming we always start with the square 'q')</p>
-	<div id="result"></div> 
+<body style="font-family:helvetica">
+	<h1>Project convex tangrams</h1>
+	<p>Possible sequences to put tangram pieces, assuming we always start with the square 'q' 
+	(permutation with repetition 6! / ( 2! * 2! )</p>
+	<div><table id="result">
+	<colgroup><col style="width:4em" /><col /></colgroup>	
 	<script>
 	var count = 0;
 	function toString(a) {
 		var s = '';
 		for(var i = 0; i < a.length; i++) {
-			s = s + a[i];
+			s = s + a[i] + " ";
 		}
 		return s;
 	}
 	// setP - already set pieces, oP: open pieces, to be set
 	function combine(setP, oP) {
 		if( oP.length <= 1 ) {
-			document.write("<p>"+count+": "+toString(setP)+toString(oP)+"</p>");
+			document.write("<tr><td>"+count+"</td><td>"+toString(setP)+toString(oP)+"</td><tr>");
 			count++;
+			return;
 		}
-		else {
-			var processed = [];
-			for(var i = 0; i < oP.length; i++) {
-				if(!processed.includes(oP[i])) {
+		var processed = [];
+		for(var i = 0; i < oP.length; i++) {
+			if(!processed.includes(oP[i])) {
 				ns = setP.slice();
 				ns.push(oP[i]);
 				no = oP.slice();
 				no.splice(i, 1);
 				combine(ns, no);
 				processed.push(oP[i]);
-				}
 			}
 		}
 	}
@@ -41,5 +43,6 @@
 	
 	combine(s, o);
 	</script>
+	</table></div>
 </body>
 </html>
