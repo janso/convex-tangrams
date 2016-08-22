@@ -34,13 +34,12 @@
 		};
 
 		Piece.prototype.set_triangle_medium = function() {
-			// this.path = [ 'S', 1, 'L', 2, 'L', 1, 'S', 4 ];
-			this.path = [ 'L', 2, 'L', 1, 'S', 4, 'S', 1 ];
+			this.path = [ 'x', 0, 'x', 1, 'x', 2, 'x', 3 ];
 			return this;
 		};
 
 		Piece.prototype.set_triangle_big = function() {
-			this.path = [ 'S', 1, 'L', 4, 'L', 1, 'S', 4, 'S', 2, 'S', 4 ];
+			this.path = [ 'S', 1, 'L', 0, 'L', 1, 'S', 0, 'S', 2, 'S', 0 ];
 			return this;
 		};
 
@@ -59,8 +58,10 @@
 			if( this.path.length == 0 ) return shape;
 			var angle = 1, v = new Vector(0, 0);
 			for(var i = 1; i < this.path.length; i = i + 2 ) {
+				// ### something is wrong here
 				angle = angle + this.path[i];
 				v.add( Vector.get_vector_for_angle( angle ) );
+				// ###
 				shape.n.push(v.clone()); 
 				console.log("i:"+i+"  angle:"+angle+"    Vector:"+v.asString());
 			}
