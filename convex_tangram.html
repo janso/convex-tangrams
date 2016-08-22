@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Calculate convex tangrams</title>
+	<script src="vector.js"></script>
+	<script src="matrix.js"></script>
+	<script src="shape.js"></script>
+	<script>		
+
+		// --------------------------------------------------------------------
+		// class Piece
+		// --------------------------------------------------------------------		
+		var Piece = function(id, color) { 
+			this.path = [];
+			// the path is a sequence of length of edges and inner angles
+			// the length of the edge can be L for long edges and S for short edges
+			// L = sqrt(2) * S
+			// the angle can be any value 0 - 7 were 0 = 0°, 1 = 45°, 2 = 90°, ...
+			// [ 'S', 1, 'L', 1, 'S', 2 ] would be tangram's small triangle
+			this.id = id; 
+			this.color = color 
+		};
+
+		Piece.prototype.clone = function() {
+			var piece = new Piece(this.id, this.color);
+			piece.path = this.path.slice(0); // clone array
+			return piece;
+		};
+		
+		Piece.prototype.set_triangle_small = function() {
+			this.path = [ 'S', 1, 'L', 1, 'S', 2 ];
+			return this;
+		};
+
+		Piece.prototype.set_triangle_medium = function() {
+			// this.path = [ 'S', 1, 'L', 2, 'L', 1, 'S', 4 ];
+			this.path = [ 'L', 2, 'L', 1, 'S', 4, 'S', 1 ];
+			return this;
+		};
+
+		Piece.prototype.set_triangle_big = function() {
+			this.path = [ 'S', 1, 'L', 4, 'L', 1, 'S', 4, 'S', 2, 'S', 4 ];
+			return this;
+		};
+
+		Piece.prototype.set_square = function() {
+			this.path = [ 'S', 2, 'S', 2, 'S', 2, 'S', 2 ];
+			return this;
+		};
+
+		Piece.prototype.set_parallelogram = function() {
+			this.path = [ 'L', 1, 'S', 3, 'L', 1, 'S', 3 ];
+			return this;
+		};
+
+		Piece.prototype.toShape = function(id, color) {
+			var shape = new Shape(id, color);
+			if( this.path.length == 0 ) return shape;
+			var angle = 1, v = new Vector(0, 0);
+			for(var i = 1; i < this.path.length; i = i + 2 ) {
+				angle = angle + this.path[i];
+				v.add( Vector.get_vector_for_angle( angle ) );
+				shape.n.push(v.clone()); 
+				console.log("i:"+i+"  angle:"+angle+"    Vector:"+v.asString());
+			}
+			return shape;
+		};
+
+		function start() {	
+			var p = new Piece();
+			// p.set_parallelogram(); // works!
+			// p.set_square(); // works!
+			// p.set_triangle_small(); // works!
+			p.set_triangle_medium();
+			
+			// transform piece to shape to draw the shape
+			var s = p.toShape(0, "#fa6666");
+
+			// draw the shape
+			Matrix.get_translation(50, 50)
+				.multiply_matrix(Matrix.get_scale(20, 20))
+				// .multiply_matrix(Matrix.get_rotate(0.1))
+				.transform_shape(s);
+
+			var ctx = document.getElementById("mainCanvas").getContext("2d");
+			s.draw(ctx);
+		}
+	</script>
+</head>
+
+
+<body onload="start();">
+	<canvas id="mainCanvas" width="1000" height="600" style="border:1px solid #000000;">
+	</canvas>
+</body>
+
+</html>
