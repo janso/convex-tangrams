@@ -7,7 +7,6 @@
 	<script src="matrix.js"></script>
 	<script src="shape.js"></script>
 	<script>		
-
 		// --------------------------------------------------------------------
 		// class Piece
 		// --------------------------------------------------------------------		
@@ -29,17 +28,17 @@
 		};
 		
 		Piece.prototype.set_triangle_small = function() {
-			this.path = [ 'S', 1, 'L', 1, 'S', 2 ];
+			this.path = [ 'L', 1, 'S', 2, 'S', 1 ];
 			return this;
 		};
 
 		Piece.prototype.set_triangle_medium = function() {
-			this.path = [ 'x', 0, 'x', 1, 'x', 2, 'x', 3 ];
+			this.path = [ 'L', 2, 'S', 1, 'S', 4, 'L', 1 ];
 			return this;
 		};
 
 		Piece.prototype.set_triangle_big = function() {
-			this.path = [ 'S', 1, 'L', 0, 'L', 1, 'S', 0, 'S', 2, 'S', 0 ];
+			this.path = [ 'L', 4, 'L', 1, 'S', 4, 'S', 2, 'S', 4, 'S', 1 ];
 			return this;
 		};
 
@@ -48,40 +47,67 @@
 			return this;
 		};
 
+
 		Piece.prototype.set_parallelogram = function() {
 			this.path = [ 'L', 1, 'S', 3, 'L', 1, 'S', 3 ];
 			return this;
 		};
 
+		Piece.prototype.comb = function() {
+			this.path = [ 'L', 3, 'S', 1, 'L', 4, 'L', 1, 'S', 3 ];
+			return this;
+		};
+
+		Piece.prototype.combine = function(motherindex, childpiece, childindex) {
+			// combine parallelogram L 1 S 3 L 1 S 3 and small triangle L 1 S 2 S 1 with
+			// motherindex 2: L 1 |S| 3 L 1 S 3 and childindex 2: L 1 |S| 2 S 1.
+			// result shall be L 3 S 1 L 4 L 1 S 3.
+			// iterate mother piece until link edge (motherindex), add angle and 
+			// continue with childpiece (modulo). 
+			// At the end of the child piece add angles and continue with rest of mother piece.
+			var combination = new Piece(this.id, this.color);
+			// iterate mother piece until link edge and copy path
+			for( var mi = 0; mi < motherindex; mi++ ) 
+				combination.path.push( this.path[mi].clone( ) );
+			// add angle
+			combination.path[combination.path.length] += childpiece.path[childindex+1]; 
+			// iterate childpiece (modulo) beginning from link edge
+			for( var ci = childindex+1; ci % childpiece.path.length < childindex; ci++) 
+				combination.path.push( childpiece.path[ci].clone( ) );
+			// add angle
+			combination.path[combination.path.length] += this.path[motherindex+1]; 
+			// continue with rest of mother piece
+			for( var mi = motherindex+1; mi % this.path.length < motherindex; mi++ ) 
+				combination.path.push( this.path[mi].clone( ) );
+			return combination;
+		};
+		
 		Piece.prototype.toShape = function(id, color) {
 			var shape = new Shape(id, color);
 			if( this.path.length == 0 ) return shape;
-			var angle = 1, v = new Vector(0, 0);
+			var angle = 0, v = new Vector(0, 0);
 			for(var i = 1; i < this.path.length; i = i + 2 ) {
-				// ### something is wrong here
-				angle = angle + this.path[i];
+				angle = ( angle + 4 - this.path[i] ) % 8;
 				v.add( Vector.get_vector_for_angle( angle ) );
-				// ###
 				shape.n.push(v.clone()); 
-				console.log("i:"+i+"  angle:"+angle+"    Vector:"+v.asString());
+				console.log("i:"+i+"  d-angle:"+this.path[i]+"  angle:"+angle+"    Vector:"+v.asString());
 			}
 			return shape;
 		};
 
 		function start() {	
-			var p = new Piece();
-			// p.set_parallelogram(); // works!
-			// p.set_square(); // works!
-			// p.set_triangle_small(); // works!
-			p.set_triangle_medium();
+			var p1 = new Piece();
+			p1.set_parallelogram();
+			var p2 = new Piece();
+			p2.set_triangle_small();
+			var p3 = p1.combine(2, p2, 2)
 			
 			// transform piece to shape to draw the shape
-			var s = p.toShape(0, "#fa6666");
-
-			// draw the shape
-			Matrix.get_translation(50, 50)
-				.multiply_matrix(Matrix.get_scale(20, 20))
-				// .multiply_matrix(Matrix.get_rotate(0.1))
+			var s = p3.toShape(0, "#fa6666");
+			// create a transformation matrix to transform the shape to a display-able format
+			Matrix.get_translation(200, 200)
+				.multiply_matrix(Matrix.get_scale(-32, 32))
+				.multiply_matrix(Matrix.get_rotate(Math.PI + 0.085))
 				.transform_shape(s);
 
 			var ctx = document.getElementById("mainCanvas").getContext("2d");
