@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Calculate convex tangrams</title>
+	<script src="vector.js"></script>
+	<script src="matrix.js"></script>
+	<script>		
+		// --------------------------------------------------------------------
+		// class Shape
+		// --------------------------------------------------------------------
+		var Shape = function(id, color) { this.id = id; this.color = color };
+
+		Shape.prototype.clone = function() {
+			var s = new Shape(this.id, this.color);
+			s.n = this.clone_nodes();
+			return s;
+		};
+		Shape.prototype.clone_nodes = function() {
+			var nn = [ ];
+			this.n.forEach(function(n) {
+				nn.push(n.clone());
+			});			
+			return nn;
+		};
+		Shape.prototype.get_node_index_add = function(i, a) {
+			var j = ( i + a ) % this.n.length;
+			if(j < 0) j = this.n.length + j;
+			return this.n[j];
+		}
+		Shape.prototype.set_triangle_big = function(x, y) {
+			this.n = [
+				new Vector(0, 0),
+				new Vector(1, 1),
+				new Vector(2, 2),
+				new Vector(1, 3),
+				new Vector(0, 4),
+				new Vector(0, 2)
+			];
+		};
+		Shape.prototype.set_triangle_medium = function(x, y) {
+			this.n = [new Vector(0, 0), new Vector(2, 0), new Vector(2, 2), new Vector(1, 1)];
+		};		
+		Shape.prototype.set_triangle_small = function(x, y) {
+			this.n = [new Vector(0, 0), new Vector(1, 1), new Vector(0, 2)];
+		};				
+		Shape.prototype.set_square = function(x, y) {
+			this.n = [new Vector(0, 1), new Vector(1, 0), new Vector(2, 1), new Vector(1, 2)];
+		};		
+		Shape.prototype.set_parallelogram = function(x, y) {
+			this.n = [new Vector(0, 0), new Vector(2, 0), new Vector(3, 1), new Vector(1, 1)];
+		};			
+		Shape.prototype.draw = function(ctx) {
+			// draw shape (as filled polygon)
+			ctx.fillStyle = this.color;
+			ctx.beginPath();
+			ctx.moveTo(this.n[0].x, this.n[0].y);
+			for( var i = 0; i < this.n.length; i++) { ctx.lineTo(this.n[i].x, this.n[i].y); }
+			ctx.closePath();
+			ctx.fill();
+			
+			// draw nodes of shape (as circles)
+			this.n.forEach(function(n) {
+				ctx.beginPath();
+				ctx.arc(n.x, n.y, 3, 0, Math.PI*2, true);
+				ctx.closePath();
+				ctx.stroke();				
+			});		
+
+			// mark first node (green)
+			ctx.fillStyle = "#00ee00";
+			ctx.beginPath();
+			ctx.arc(this.n[0].x, this.n[0].y, 3, 0, Math.PI*2, true);
+			ctx.closePath(); ctx.fill();	
+	
+			// mark second node (yellow)
+			ctx.fillStyle = "#eeee00";
+			ctx.beginPath();
+			ctx.arc(this.n[1].x, this.n[1].y, 3, 0, Math.PI*2, true);
+			ctx.closePath(); ctx.fill();			
+		};
+		Shape.prototype.rotate_quarter = function(q) {
+			this.n.forEach(function node(n) { n.rotate_quarter(q); });
+		};
+		Shape.prototype.translate = function(v) {
+			this.n.forEach(function node(n) { n.translate(v.x, v.y); });
+		};		
+		Shape.prototype.asString = function() {
+			var logline = "";
+			this.n.forEach(function node(n) {
+				logline = logline + n.asString() + "->";
+			});
+			return logline;
+		};
+		Shape.prototype.check_apply = function(local_node_index, foreign_shape, foreign_node_index) {
+			// bring foreign shape's node on local shapes node's coordinates
+			foreign_shape.translate(foreign_shape.n[foreign_node_index].difference(this.n[local_node_index]));
+			
+			// check if foreign shape can be applied 
+			// 1. do the edges have oposite directions
+			// 1.a next edge of local node (and previous edge of foreign node)
+			var ln = this.get_node_index_add(local_node_index, 1); // get next node of local shape
+			var fn = foreign_shape.get_node_index_add(foreign_node_index, -1); // get previous node of foreign shape
+			if(ln.equal(fn)) return true;
+			// 1.b previous edge of local node (and next edge of foreign node)
+			var ln = this.get_node_index_add(local_node_index, -1); // get next node of local shape
+			var fn = foreign_shape.get_node_index_add(foreign_node_index, 1); // get previous node of foreign shape
+			if(ln.equal(fn)) return true;	
+			// ### more checks (avoid overlaps)
+
+			
+			return false;
+		};
+		Shape.prototype.merge = function(foreign_shape) {
+		
+		};
+		
+		function start() {	
+			var s1 = new Shape(0, "#fa6666");
+			s1.set_triangle_big();
+			s1.translate(new Vector(7, 1));
+			var s2 = new Shape(1, "#66fa66");
+			//s2.set_triangle_medium();
+			//s2.set_triangle_small();
+			//s2.set_square();
+			s2.set_parallelogram();
+			s2.rotate_quarter(0);
+			s2.translate(new Vector(1, 2));
+			console.log("applies? "+s1.check_apply(0, s2, 0));
+						
+			Matrix.get_translation(50, 50)
+				.multiply_matrix(Matrix.get_scale(20, 20))
+				.multiply_matrix(Matrix.get_rotate(0.1))
+				.transform_shape(s1)
+				.transform_shape(s2);
+
+			var ctx = document.getElementById("mainCanvas").getContext("2d");
+			s1.draw(ctx);
+			s2.draw(ctx);
+		}
+	</script>
+</head>
+
+
+<body onload="start();">
+	<canvas id="mainCanvas" width="1000" height="600" style="border:1px solid #000000;">
+	</canvas>
+</body>
+
+</html>
