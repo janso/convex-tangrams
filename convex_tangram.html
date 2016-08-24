@@ -76,8 +76,9 @@
 			// add angle
 			combination.path[combination.path.length-1] += this.path[motherindex+1]; 
 			// continue with rest of mother piece
-			for(var mi=motherindex+2; mi!=motherindex-2; mi=(mi+1)%this.path.length) 
+			for(var mi=motherindex+2, i=0; i++<this.path.length-4; mi=(mi+1)%this.path.length) 
 				combination.path.push(this.path[mi]);
+
 			return combination;
 		};
 		 
@@ -96,12 +97,30 @@
 		};
 
 		function start() {	
+			/*
+			// combine parallelogram and small triangle (works)
 			var p1=new Piece();
 			p1.set_parallelogram();
 			var p2=new Piece();
 			p2.set_triangle_small();
-			// var p3=p1.combine(2, p2, 2);
-			var p3=p1.combine(2, p2, 4);
+			var p3=p1.combine(2, p2, 2);
+			*/
+			
+			/*
+			// combine parallelogram and medium triangle (works)
+			var p1=new Piece();
+			p1.set_parallelogram();
+			var p2=new Piece();
+			p2.set_triangle_medium();
+			var p3=p1.combine(4, p2, 0);
+			*/
+
+			// combine parallelogram and medium triangle, 0 on 0 (doesn't work, debug)
+			var p1=new Piece();
+			p1.set_parallelogram();
+			var p2=new Piece();
+			p2.set_triangle_medium();
+			var p3=p1.combine(0, p2, 0);
 			
 			// transform piece to shape to draw it
 			var s=p3.toShape(0, "#fa6666");
