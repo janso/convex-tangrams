@@ -25,13 +25,19 @@
 			return piece;
 		};
 		
+		Piece.prototype.asString=function() {
+			var r="";
+			this.path.forEach(function(e) {	r=r+e+" " })
+			return r;
+		}
+		
 		Piece.prototype.set_triangle_small=function() {
 			this.path=[ 'L', 1, 'S', 2, 'S', 1 ];
 			return this;
 		};
 
 		Piece.prototype.set_triangle_medium=function() {
-			this.path=[ 'L', 2, 'S', 1, 'S', 4, 'L', 1 ];
+			this.path=[ 'L', 1, 'S', 4, 'S', 1, 'L', 2 ];
 			return this;
 		};
 
@@ -51,8 +57,9 @@
 			return this;
 		};
 
-		Piece.prototype.comb=function() {
-			this.path=[ 'L', 3, 'S', 1, 'L', 4, 'L', 1, 'S', 3 ];
+		Piece.prototype.set_test=function() {
+			//this.path=[ 'L', 3, 'S', 3, 'L', 1, 'S', 4, 'S', 4, 'S', 1, ];
+			this.path=[ 'S', 4, 'S', 1, 'L', 3, 'S', 3, 'L', 1, 'S', 4, ];
 			return this;
 		};
 
@@ -65,19 +72,25 @@
 			// At the end of the child piece add angles and continue with rest of mother piece.
 			if(this.path[motherindex]!=childpiece.path[childindex]) throw "incompatible edges";
 			var combination=new Piece(this.id, this.color);
+			var mimod=0;
 			// iterate mother piece until link edge and copy path
 			for(var mi=0; mi < motherindex; mi++) 
 				combination.path.push(this.path[mi]);
 			// add angle
-			combination.path[combination.path.length-1] += childpiece.path[childindex+1]; 
+			if(combination.path.length>1)
+				combination.path[combination.path.length-1]+=childpiece.path[childindex+1]; 
+			else
+				mimod = 2;
 			// iterate childpiece (modulo) beginning from link edge
 			for(var ci=childindex+2, i=0; i++<childpiece.path.length-2; ci=(ci+1)%childpiece.path.length) 
 				combination.path.push(childpiece.path[ci]);
 			// add angle
 			combination.path[combination.path.length-1] += this.path[motherindex+1]; 
 			// continue with rest of mother piece
-			for(var mi=motherindex+2, i=0; i++<this.path.length-4; mi=(mi+1)%this.path.length) 
+			for(var mi=motherindex+2, i=0; i++<this.path.length-4+mimod; mi=(mi+1)%this.path.length) 
 				combination.path.push(this.path[mi]);
+			if(mimod!=0) 
+				combination.path[combination.path.length-1]+=childpiece.path[childindex+1]; 
 
 			return combination;
 		};
@@ -86,12 +99,13 @@
 			var shape=new Shape(id, color);
 			if(this.path.length == 0) return shape;
 			var angle=0;
+			if(this.path[0]="S") angle += 1;
 			var v=new Vector(0, 0);
 			for(var i=1; i<this.path.length; i=i+2) {
 				angle=(angle+4-this.path[i])%8;
 				v.add(Vector.get_vector_for_angle(angle));
 				shape.n.push(v.clone()); 
-				console.log("i:"+i+"  d-angle:"+this.path[i]+"  angle:"+angle+"    Vector:"+v.asString());
+				// console.log("i="+i+"  angle="+this.path[i]+"  cangle="+angle+"   v:"+v.asString());
 			}
 			return shape;
 		};
@@ -115,13 +129,23 @@
 			var p3=p1.combine(4, p2, 0);
 			*/
 
-			// combine parallelogram and medium triangle, 0 on 0 (doesn't work, debug)
+			/*
+			// combine parallelogram and medium triangle, 0 on 0 (works)
 			var p1=new Piece();
 			p1.set_parallelogram();
 			var p2=new Piece();
 			p2.set_triangle_medium();
 			var p3=p1.combine(0, p2, 0);
+			*/
 			
+			// combine parallelogram and medium triangle, 0 on 0 (doesn't work, debug)
+			var p1=new Piece();
+			p1.set_parallelogram();
+			var p2=new Piece();
+			p2.set_triangle_medium();
+			var p3=p1.combine(0, p2, 6);
+			
+			console.log("p3: "+p3.asString());
 			// transform piece to shape to draw it
 			var s=p3.toShape(0, "#fa6666");
 			// create a transformation matrix to transform the shape in a display-able format
