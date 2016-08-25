@@ -82,16 +82,21 @@
 			else
 				mimod = 2;
 			// iterate childpiece (modulo) beginning from link edge
-			for(var ci=childindex+2, i=0; i++<childpiece.path.length-2; ci=(ci+1)%childpiece.path.length) 
-				combination.path.push(childpiece.path[ci]);
+			for(var ci=(childindex+2)%childpiece.path.length, i=0; 
+				i++<childpiece.path.length-2; 
+				ci=(ci+1)%childpiece.path.length) {
+					combination.path.push(childpiece.path[ci]);
+				}
 			// add angle
 			combination.path[combination.path.length-1] += this.path[motherindex+1]; 
 			// continue with rest of mother piece
-			for(var mi=motherindex+2, i=0; i++<this.path.length-4+mimod; mi=(mi+1)%this.path.length) 
-				combination.path.push(this.path[mi]);
+			for(var mi=(motherindex+2)%this.path.length, i=0; 
+				i++<this.path.length-4+mimod; 
+				mi=(mi+1)%this.path.length) {
+					combination.path.push(this.path[mi]);				
+				}
 			if(mimod!=0) 
 				combination.path[combination.path.length-1]+=childpiece.path[childindex+1]; 
-
 			return combination;
 		};
 		 
@@ -99,7 +104,7 @@
 			var shape=new Shape(id, color);
 			if(this.path.length == 0) return shape;
 			var angle=0;
-			if(this.path[0]="S") angle += 1;
+			if(this.path[0]="S") angle = 1;
 			var v=new Vector(0, 0);
 			for(var i=1; i<this.path.length; i=i+2) {
 				angle=(angle+4-this.path[i])%8;
