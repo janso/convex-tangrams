@@ -28,6 +28,7 @@
 		Piece.prototype.asString=function() {
 			var r="";
 			this.path.forEach(function(e) {	r=r+e+" " })
+			if(this.isConsistent()) r=r+" (consistent)"; else r=r+" INCONSISTENT!";
 			return r;
 		}
 		
@@ -99,16 +100,31 @@
 				combination.path[combination.path.length-1]+=childpiece.path[childindex+1]; 
 			return combination;
 		};
-		 
+		
+		Piece.prototype.isConsistent=function() {
+			// checks if to total of the inner angles fits to the number of edges and
+			// if the starting point equals the end point
+			if(this.path.length == 0) return true;
+			var vangle=0; cangle=0;
+			var v=new Vector(0, 0);
+			for(var i=1; i<this.path.length; i=i+2) {
+				cangle+=this.path[i];
+				vangle=(vangle+4-this.path[i])%8;
+				v.add(Vector.get_vector_for_angle(vangle));
+			}
+			var r=(v.x == 0 && v.y == 0) && (2*this.path.length-8==cangle);
+			return r; 
+		};
+		
 		Piece.prototype.toShape=function(id, color) {
 			var shape=new Shape(id, color);
 			if(this.path.length == 0) return shape;
-			var angle=0;
-			if(this.path[0]="S") angle = 1;
+			var vangle=0;
+			if(this.path[0]=="S") angle = 1;
 			var v=new Vector(0, 0);
 			for(var i=1; i<this.path.length; i=i+2) {
-				angle=(angle+4-this.path[i])%8;
-				v.add(Vector.get_vector_for_angle(angle));
+				vangle=(vangle+4-this.path[i])%8;
+				v.add(Vector.get_vector_for_angle(vangle));
 				shape.n.push(v.clone()); 
 				// console.log("i="+i+"  angle="+this.path[i]+"  cangle="+angle+"   v:"+v.asString());
 			}
@@ -126,7 +142,7 @@
 			*/
 			
 			/*
-			// combine parallelogram and medium triangle (works)
+			// combine parallelogram and medium triangle 4 on 0 (works)
 			var p1=new Piece();
 			p1.set_parallelogram();
 			var p2=new Piece();
@@ -143,12 +159,22 @@
 			var p3=p1.combine(0, p2, 0);
 			*/
 			
-			// combine parallelogram and medium triangle, 0 on 0 (doesn't work, debug)
+			/*
+			// combine parallelogram and medium triangle, 0 on 6 (works)
 			var p1=new Piece();
 			p1.set_parallelogram();
 			var p2=new Piece();
 			p2.set_triangle_medium();
 			var p3=p1.combine(0, p2, 6);
+			*/
+			
+			// combine parallelogram and square, 2 on 0 (works)
+			var p1=new Piece();
+			p1.set_parallelogram();
+			var p2=new Piece();
+			p2.set_square();
+			var p3=p1.combine(2, p2, 0);
+			p3.set_triangle_small();
 			
 			console.log("p3: "+p3.asString());
 			// transform piece to shape to draw it
