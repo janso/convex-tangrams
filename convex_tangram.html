@@ -15,14 +15,11 @@
 			// L=sqrt(2) * S
 			// the angle can be any value 0-7 were 0=0°, 1=45°, 2=90°, ...
 			// [ 'S', 1, 'L', 1, 'S', 2 ] would be tangram's small triangle
-			this.id=id; 
-			this.color=color 
+			this.id=id; this.color=color 
 		};
 
 		Figure.prototype.clone=function() {
-			var f=new Figure(this.id, this.color);
-			f.path=this.path.slice(0); // clone array
-			return f;
+			return new Figure(this.id, this.color).path=this.path.slice(0); // clone array
 		};
 		
 		Figure.prototype.asString=function() {
@@ -59,7 +56,6 @@
 		};
 
 		Figure.prototype.set_test=function() {
-			//this.path=[ 'L', 3, 'S', 3, 'L', 1, 'S', 4, 'S', 4, 'S', 1, ];
 			this.path=[ 'S', 4, 'S', 1, 'L', 3, 'S', 3, 'L', 1, 'S', 4, ];
 			return this;
 		};
@@ -81,7 +77,7 @@
 			if(combination.path.length>1)
 				combination.path[combination.path.length-1]+=childpiece.path[childindex+1]; 
 			else
-				mimod = 2;
+				mimod=2;
 			// iterate child-figure (modulo) beginning from link edge
 			for(var ci=(childindex+2)%childpiece.path.length, i=0; 
 				i++<childpiece.path.length-2; 
@@ -104,21 +100,21 @@
 		Figure.prototype.isConsistent=function() {
 			// checks if to total of the inner angles fits to the number of edges and
 			// if the starting point equals the end point
-			if(this.path.length == 0) return true;
+			if(this.path.length==0) return true;
 			var vangle=0; cangle=0; v=new Vector(0, 0);
 			for(var i=1; i<this.path.length; i=i+2) {
 				cangle+=this.path[i];
 				vangle=(vangle+4-this.path[i])%8;
 				v.add(Vector.get_vector_for_angle(vangle));
 			}
-			var r=(v.x == 0 && v.y == 0) && (2*this.path.length-8==cangle);
+			var r=(v.x==0&&v.y==0)&&(2*this.path.length-8==cangle);
 			return r; 
 		};
 		
 		Figure.prototype.toShape=function(id, color) {
 			// convert a figure (angle and edge length) to a shape (x,y) to draw it
 			var shape=new Shape(id, color);
-			if(this.path.length == 0) return shape;
+			if(this.path.length==0) return shape;
 			var vangle=0;
 			if(this.path[0]=="S") angle = 1;
 			var v=new Vector(0, 0);
@@ -174,6 +170,7 @@
 			var f2=new Figure();
 			f2.set_square();
 			var f3=f1.combine(2, f2, 0);
+			var f3=f1.clone();
 			
 			console.log("f3: "+f3.asString());
 			// transform piece to shape to draw it
