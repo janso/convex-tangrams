@@ -18,14 +18,38 @@ Figure.prototype.clone=function() {
 Figure.prototype.normalize=function() {
 	// find smallest angle in path, collect indexes of smalest angle in minindex[]
 	var minangle=8; minindex=[];
-	for(var i=1; i=i+2; i<this.path.length) {
+	for(var i=1; i<this.path.length; i=i+2) {
 		if(this.path[i]<minangle) {
-			minangle=this.path[i]; // find smallest angle in path
+			minangle=this.path[i]; 
 			minindex=[];
 		}
 		if(this.path[i]==minangle) minindex.push(i); // collect indexes of smalest angle
 	}
-	// ### continue here
+	// calculate for each index a value from the subsequent angles
+	// store minimun of those values in minv and the corresponding index in mindex
+	var value=0; mi=1; minv=Math.pow(2, 30); mindex=-1;
+	if(minindex.length==1)
+		mindex = minindex[0];
+	else {
+		for(var i=minindex[0]+2, c=0; 
+			c++<this.path.length/2; 
+			i=(i+2)%this.path.length) {
+				
+			if(i==minindex[mi]) {
+				if(minv > value) { minv=value; mindex=mi; }
+				mi=(mi++)%minindex.length; value=0;
+			}
+			else value=10*value+this.path[i];
+		}
+	} // minindex.length==1
+	var newpath=[];
+	for(var i=mindex-1, c=0; 
+		c++<this.path.length; 
+		i=(i+1)%this.path.length) {
+		
+		newpath.push(this.path[i]);
+	}				
+	this.path = newpath;
 	return this;
 };
 
@@ -90,7 +114,7 @@ Figure.prototype.combine=function(motherindex, childpiece, childindex) {
 		i++<childpiece.path.length-2; 
 		ci=(ci+1)%childpiece.path.length) {
 			combination.path.push(childpiece.path[ci]);
-		}
+	}
 	// add angle
 	combination.path[combination.path.length-1] += this.path[motherindex+1]; 
 	// continue with rest of mother-figure
@@ -98,7 +122,7 @@ Figure.prototype.combine=function(motherindex, childpiece, childindex) {
 		i++<this.path.length-4+mimod; 
 		mi=(mi+1)%this.path.length) {
 			combination.path.push(this.path[mi]);				
-		}
+	}
 	if(mimod!=0) 
 		combination.path[combination.path.length-1]+=childpiece.path[childindex+1]; 
 	return combination;

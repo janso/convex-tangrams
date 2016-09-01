@@ -12,14 +12,18 @@
 		// combine parallelogram and square, 2 on 0 (works)
 		var f1=new Figure();
 		f1.set_parallelogram();
+		
 		var f2=new Figure();
 		f2.set_square();
 		var f3=f1.combine(2, f2, 0); // combine parallelogram and square
 		
 		// add another square to the combination
 		var f4=f3.combine(2, f2, 0); 
-		
-		console.log("f4: "+f4.asString());
+
+		console.log("f4             : "+f4.asString());
+		f4.normalize();
+		console.log("f4 (normalized): "+f4.asString());
+
 		// transform piece to shape to draw it
 		var s=f4.toShape(0, "#fa6666");
 		// create a transformation matrix to transform the shape in a display-able format
