@@ -5,27 +5,20 @@
 	<script src="js/matrix.js"></script>
 	<script src="js/shape.js"></script>
 	<script src="js/figure.js"></script>
-	<script src="js/test_figure.js"></script>
+	<script src="js/test.js"></script>
 	
 	<script>		
 	function start() {	
-		// combine parallelogram and square, 2 on 0 (works)
-		var f1=new Figure();
-		f1.set_parallelogram();
-		
-		var f2=new Figure();
-		f2.set_square();
-		var f3=f1.combine(2, f2, 0); // combine parallelogram and square
-		
-		// add another square to the combination
-		var f4=f3.combine(2, f2, 0); 
+		// unit tests
+		figure_unit_test();
+	
 
-		console.log("f4             : "+f4.asString());
-		f4.normalize();
-		console.log("f4 (normalized): "+f4.asString());
-
+		var f1=new Figure().set_parallelogram();
+		var f2=new Figure().set_triangle_medium();
+		var f3=f1.combine(4, f2, 0); //.normalize();
+		
 		// transform piece to shape to draw it
-		var s=f4.toShape(0, "#fa6666");
+		var s=f3.toShape(0, "#fa6666");
 		// create a transformation matrix to transform the shape in a display-able format
 		Matrix.get_translation(200, 200)
 			.multiply_matrix(Matrix.get_scale(-32, 32))

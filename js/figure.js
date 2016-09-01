@@ -8,7 +8,8 @@ var Figure=function(id, color) {
 	// L=sqrt(2) * S
 	// the angle can be any value 0-7 were 0=0°, 1=45°, 2=90°, ...
 	// [ 'S', 1, 'L', 1, 'S', 2 ] would be tangram's small triangle
-	this.id=id; this.color=color 
+	this.id=id; this.color=color;
+	this.hash = 0; // hash is calculated in normalize
 };
 
 Figure.prototype.clone=function() {
@@ -36,19 +37,22 @@ Figure.prototype.normalize=function() {
 			i=(i+2)%this.path.length) {
 				
 			if(i==minindex[mi]) {
-				if(minv > value) { minv=value; mindex=mi; }
+				if(minv > value) { minv=value; mindex=i; }
 				mi=(mi++)%minindex.length; value=0;
 			}
 			else value=10*value+this.path[i];
 		}
 	} // minindex.length==1
 	var newpath=[];
+	// bring path to normalized form an calculate hash
+	this.hash=this.path[mindex-1]; // add S (for short edge) or L to hash
 	for(var i=mindex-1, c=0; 
 		c++<this.path.length; 
 		i=(i+1)%this.path.length) {
 		
 		newpath.push(this.path[i]);
-	}				
+		if(i%2==1) this.hash=this.hash+this.path[i];
+	}
 	this.path = newpath;
 	return this;
 };
@@ -56,6 +60,7 @@ Figure.prototype.normalize=function() {
 Figure.prototype.asString=function() {
 	var r="";
 	this.path.forEach(function(e) {	r=r+e+" " })
+	if(this.hash==0) r=r+" no hash"; else r=r+" #"+this.hash;
 	if(this.isConsistent()) r=r+" (consistent)"; else r=r+" INCONSISTENT!";
 	return r;
 }
