@@ -20,42 +20,41 @@ Figure.prototype.clone=function() {
 
 Figure.prototype.normalize=function() {
 	// find smallest angle in path, collect indexes of smalest angle in minindex[]
-	var minangle=8; minindex=[];
+	var min_angle=8; 
+	var min_index_array=[];
 	for(var i=1; i<this.path.length; i=i+2) {
-		if(this.path[i]<minangle) {
-			minangle=this.path[i]; 
-			minindex=[];
+		if(this.path[i]<min_angle) {
+			min_angle=this.path[i]; 
+			min_index_array=[];
 		}
-		if(this.path[i]==minangle) minindex.push(i); // collect indexes of smalest angle
+		if(this.path[i]==min_angle) min_index_array.push(i); // collect indexes of smalest angle
 	}
 	// calculate for each index a value from the subsequent angles
 	// store minimun of those values in minv and the corresponding index in mindex
-	var value=0; mi=1; minv=Math.pow(2, 30); mindex=-1;
-	if(minindex.length==1)
-		mindex = minindex[0];
+	if(min_index_array.length==1)
+		min_index = min_index_array[0];
 	else {
-		for(var i=minindex[0]+2, c=0; 
-			c++<this.path.length/2; 
-			i=(i+2)%this.path.length) {
-				
-			if(i==minindex[mi]) {
-				if(minv > value) { minv=value; mindex=i; }
-				mi=(mi++)%minindex.length; value=0;
+		var value=0;
+		var min_index=-1;
+		var mia_index=0;
+		var min_value=Math.pow(2, 30); 
+		for(var i=min_index_array[mia_index]+2, c=0; c++<this.path.length/2; i=(i+2)%this.path.length ) {
+			if(i==min_index_array[(mia_index+1)%min_index_array.length]) {
+				if(value<min_value) {min_value=value; min_index=min_index_array[mia_index]; }
+				value=0;
+				mia_index=(mia_index+1)%min_index_array.length;
 			}
-			else value=10*value+this.path[i];
+			else value=value/10+this.path[i];
 		}
 	} // minindex.length==1
-	var newpath=[];
 	// bring path to normalized form an calculate hash
-	this.hash=this.path[mindex-1]; // add S (for short edge) or L to hash
-	for(var i=mindex-1, c=0; 
-		c++<this.path.length; 
-		i=(i+1)%this.path.length) {
-		
-		newpath.push(this.path[i]);
-		if(i%2==1) this.hash=this.hash+this.path[i];
+	var norm_path=[];
+	this.hash=this.path[min_index-1]; // add S (for short edge) or L to hash
+	for(var i=min_index-1, c=0; c++<this.path.length; i=(i+1)%this.path.length) {
+		norm_path.push(this.path[i]); // create normalized path 
+		if(i%2==1) this.hash=this.hash+this.path[i]; // calculate hash
 	}
-	this.path = newpath;
+	this.path = norm_path; // use normalized path
 	return this;
 };
 
@@ -109,7 +108,9 @@ Figure.prototype.isConsistent=function() {
 	// checks if to total of the inner angles fits to the number of edges and
 	// if the starting point equals the end point
 	if(this.path.length==0) return true;
-	var vangle=0; cangle=0; v=new Vector(0, 0);
+	var vangle=0; 
+	var cangle=0; 
+	var v=new Vector(0, 0);
 	if(this.path[0]=="S") vangle = 1;
 	for(var i=1; i<this.path.length; i=i+2) {
 		cangle+=this.path[i];
@@ -132,7 +133,6 @@ Figure.prototype.toShape=function(id, color) {
 		vangle=(vangle+12-this.path[i])%8;
 		v.add(Vector.get_vector_for_angle(vangle));
 		shape.n.push(v.clone()); 
-		// console.log("i="+i+"  angle="+this.path[i]+"  cangle="+angle+"   v:"+v.asString());
 	}
 	return shape;
 };
@@ -148,11 +148,6 @@ Figure.prototype.combine=function(motherindex, childpiece, childindex) {
 	if(this.path[motherindex]!=childpiece.path[childindex]) throw "incompatible edges";
 	var combination=new Figure(this.id, this.color);
 	var mimod=0;
-	/*
-	// iterate mother-figure until link edge and copy path
-	for(var mi=0; mi < motherindex; mi++) 
-		combination.path.push(this.path[mi]);
-	*/
 	// copy elements of mother to combination
 	for(var mi=(motherindex+2)%this.path.length, i=0; 
 		i++<this.path.length-2; 
@@ -173,8 +168,6 @@ Figure.prototype.combine=function(motherindex, childpiece, childindex) {
 	}
 	// add angle
 	combination.path[combination.path.length-1] += this.path[motherindex+1]; 
-
-	if(mimod!=0) 
-		combination.path[combination.path.length-1]+=childpiece.path[childindex+1]; 
+	if(mimod!=0) combination.path[combination.path.length-1]+=childpiece.path[childindex+1]; 
 	return combination;
 };

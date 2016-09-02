@@ -1,6 +1,10 @@
 // --------------------------------------------------------------------
 // test function for figures 
-// --------------------------------------------------------------------	
+// --------------------------------------------------------------------
+
+// do unit tests before we really start
+figure_unit_test();
+
 function figure_unit_test() {
 	// combine parallelogram and small triangle
 	var f1=new Figure().set_parallelogram();
@@ -12,26 +16,23 @@ function figure_unit_test() {
 	var f1=new Figure().set_parallelogram();
 	var f2=new Figure().set_triangle_medium();
 	var f3=f1.combine(4, f2, 0).normalize();
-	test("p@4+tm@0", f3.hash, "S1331144");
+	test("p@4+tm@0", f3.hash, "S133144");
 
 	// combine parallelogram and medium triangle, 0 on 0 (works)
 	var f1=new Figure().set_parallelogram();
 	var f2=new Figure().set_triangle_medium();
 	var f3=f1.combine(0, f2, 0).normalize();
-	console.log(f3.hash);
-	test("p@4+tm@0", f3.hash, "L144133");
+	test("p@0+tm@0", f3.hash, "S133144");
 	
-	
-	/*
 	// combine parallelogram and medium triangle, 0 on 6 (works)
-	var f1=new Figure();
-	f1.set_parallelogram();
-	var f2=new Figure();
-	f2.set_triangle_medium();
-	var f3=f1.combine(0, f2, 6);
-	*/
+	var f1=new Figure().set_parallelogram();
+	var f2=new Figure().set_triangle_medium();
+	var f3=f1.combine(0, f2, 6).normalize();
+	test("p@0+tm@6", f3.hash, "L142315");
+	
+	console.log("unit tests passed");
 }
 
 function test(testcase, h1, h2) {
-	if(h1!=h2) throw testcase+" failed!";
+	if(h1!=h2) throw "testcase "+testcase+" failed!";
 }
