@@ -13,6 +13,51 @@ var Figure=function(id, color) {
 };
 
 
+Figure.prototype.asString=function() {
+	var r="";
+	this.path.forEach(function(e) {	r=r+e+" " })
+	if(this.hash==0) r=r+" no hash"; else r=r+" #"+this.hash;
+	if(this.isConsistent()) r=r+" (consistent)"; else r=r+" INCONSISTENT!";
+	return r;
+}
+
+
+Figure.prototype.set_triangle_small=function() {
+	this.path=[ 'L', 1, 'S', 2, 'S', 1 ];
+	return this;
+};
+
+
+Figure.prototype.set_triangle_medium=function() {
+	this.path=[ 'L', 1, 'S', 4, 'S', 1, 'L', 2 ];
+	return this;
+};
+
+
+Figure.prototype.set_triangle_big=function() {
+	this.path=[ 'L', 4, 'L', 1, 'S', 4, 'S', 2, 'S', 4, 'S', 1 ];
+	return this;
+};
+
+
+Figure.prototype.set_square=function() {
+	this.path=[ 'S', 2, 'S', 2, 'S', 2, 'S', 2 ];
+	return this;
+};
+
+
+Figure.prototype.set_parallelogram=function() {
+	this.path=[ 'L', 1, 'S', 3, 'L', 1, 'S', 3 ];
+	return this;
+};
+
+
+Figure.prototype.set_test=function() {
+	this.path=[ 'S', 4, 'S', 1, 'L', 3, 'S', 3, 'L', 1, 'S', 4, ];
+	return this;
+};
+
+
 Figure.prototype.clone=function() {
 	return new Figure(this.id, this.color).path=this.path.slice(0); // clone array
 };
@@ -59,51 +104,6 @@ Figure.prototype.normalize=function() {
 };
 
 
-Figure.prototype.asString=function() {
-	var r="";
-	this.path.forEach(function(e) {	r=r+e+" " })
-	if(this.hash==0) r=r+" no hash"; else r=r+" #"+this.hash;
-	if(this.isConsistent()) r=r+" (consistent)"; else r=r+" INCONSISTENT!";
-	return r;
-}
-
-
-Figure.prototype.set_triangle_small=function() {
-	this.path=[ 'L', 1, 'S', 2, 'S', 1 ];
-	return this;
-};
-
-
-Figure.prototype.set_triangle_medium=function() {
-	this.path=[ 'L', 1, 'S', 4, 'S', 1, 'L', 2 ];
-	return this;
-};
-
-
-Figure.prototype.set_triangle_big=function() {
-	this.path=[ 'L', 4, 'L', 1, 'S', 4, 'S', 2, 'S', 4, 'S', 1 ];
-	return this;
-};
-
-
-Figure.prototype.set_square=function() {
-	this.path=[ 'S', 2, 'S', 2, 'S', 2, 'S', 2 ];
-	return this;
-};
-
-
-Figure.prototype.set_parallelogram=function() {
-	this.path=[ 'L', 1, 'S', 3, 'L', 1, 'S', 3 ];
-	return this;
-};
-
-
-Figure.prototype.set_test=function() {
-	this.path=[ 'S', 4, 'S', 1, 'L', 3, 'S', 3, 'L', 1, 'S', 4, ];
-	return this;
-};
-
-
 Figure.prototype.isConsistent=function() {
 	// checks if to total of the inner angles fits to the number of edges and
 	// if the starting point equals the end point
@@ -138,7 +138,47 @@ Figure.prototype.toShape=function(id, color) {
 };
 
 
+Figure.prototype.combine_simple=function(motherindex, childpiece, childindex) {
+	// combine_simple is the first working version of combine. 
+	// It is limited to combine figures that share exactly one edge: 
+	// combine is in development - without the limitation
+
+	// combine parallelogram L 1 S 3 L 1 S 3 and small triangle L 1 S 2 S 1 with
+	// motherindex 2: L 1 |S| 3 L 1 S 3 and childindex 2: L 1 |S| 2 S 1.
+	// result shall be L 3 S 1 L 4 L 1 S 3.
+	// iterate mother piece until link edge (motherindex), add angle and 
+	// continue with childpiece (modulo). 
+	// At the end of the child piece add angles and continue with rest of mother piece.
+	if(this.path[motherindex]!=childpiece.path[childindex]) throw "incompatible edges";
+	var combination=new Figure(this.id, this.color);
+	var mimod=0;
+	// copy elements of mother to combination
+	for(var mi=(motherindex+2)%this.path.length, i=0; 
+		i++<this.path.length-2; 
+		mi=(mi+1)%this.path.length) {
+			combination.path.push(this.path[mi]);				
+	}
+
+	// add angle
+	if(combination.path.length>1)
+		combination.path[combination.path.length-1]+=childpiece.path[childindex+1]; 
+	else
+		mimod=2;
+	// iterate child-figure (modulo) beginning from link edge
+	for(var ci=(childindex+2)%childpiece.path.length, i=0; 
+		i++<childpiece.path.length-2; 
+		ci=(ci+1)%childpiece.path.length) {
+			combination.path.push(childpiece.path[ci]);
+	}
+	// add angle
+	combination.path[combination.path.length-1] += this.path[motherindex+1]; 
+	if(mimod!=0) combination.path[combination.path.length-1]+=childpiece.path[childindex+1]; 
+	return combination;
+};
+
+
 Figure.prototype.combine=function(motherindex, childpiece, childindex) {
+	// ### continue here!
 	// combine parallelogram L 1 S 3 L 1 S 3 and small triangle L 1 S 2 S 1 with
 	// motherindex 2: L 1 |S| 3 L 1 S 3 and childindex 2: L 1 |S| 2 S 1.
 	// result shall be L 3 S 1 L 4 L 1 S 3.
