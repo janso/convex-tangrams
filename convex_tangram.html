@@ -12,10 +12,12 @@
 		// unit tests
 		figure_unit_test();
 	
-
 		var f1=new Figure().set_parallelogram();
+		console.log("f1:"+f1.asString());
 		var f2=new Figure().set_triangle_medium();
-		var f3=f1.combine(4, f2, 0); //.normalize();
+		console.log("f2:"+f2.asString());
+		var f3=f1.combine(4, f2, 0); 
+		console.log("f3:"+f3.asString());
 		
 		// transform piece to shape to draw it
 		var s=f3.toShape(0, "#fa6666");

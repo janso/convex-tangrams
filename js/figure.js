@@ -12,9 +12,11 @@ var Figure=function(id, color) {
 	this.hash = 0; // hash is calculated in normalize
 };
 
+
 Figure.prototype.clone=function() {
 	return new Figure(this.id, this.color).path=this.path.slice(0); // clone array
 };
+
 
 Figure.prototype.normalize=function() {
 	// find smallest angle in path, collect indexes of smalest angle in minindex[]
@@ -57,6 +59,7 @@ Figure.prototype.normalize=function() {
 	return this;
 };
 
+
 Figure.prototype.asString=function() {
 	var r="";
 	this.path.forEach(function(e) {	r=r+e+" " })
@@ -65,20 +68,24 @@ Figure.prototype.asString=function() {
 	return r;
 }
 
+
 Figure.prototype.set_triangle_small=function() {
 	this.path=[ 'L', 1, 'S', 2, 'S', 1 ];
 	return this;
 };
+
 
 Figure.prototype.set_triangle_medium=function() {
 	this.path=[ 'L', 1, 'S', 4, 'S', 1, 'L', 2 ];
 	return this;
 };
 
+
 Figure.prototype.set_triangle_big=function() {
 	this.path=[ 'L', 4, 'L', 1, 'S', 4, 'S', 2, 'S', 4, 'S', 1 ];
 	return this;
 };
+
 
 Figure.prototype.set_square=function() {
 	this.path=[ 'S', 2, 'S', 2, 'S', 2, 'S', 2 ];
@@ -91,10 +98,45 @@ Figure.prototype.set_parallelogram=function() {
 	return this;
 };
 
+
 Figure.prototype.set_test=function() {
 	this.path=[ 'S', 4, 'S', 1, 'L', 3, 'S', 3, 'L', 1, 'S', 4, ];
 	return this;
 };
+
+
+Figure.prototype.isConsistent=function() {
+	// checks if to total of the inner angles fits to the number of edges and
+	// if the starting point equals the end point
+	if(this.path.length==0) return true;
+	var vangle=0; cangle=0; v=new Vector(0, 0);
+	if(this.path[0]=="S") vangle = 1;
+	for(var i=1; i<this.path.length; i=i+2) {
+		cangle+=this.path[i];
+		vangle=(vangle+12-this.path[i])%8;
+		v.add(Vector.get_vector_for_angle(vangle));
+	}
+	var r=(v.x==0&&v.y==0)&&(2*this.path.length-8==cangle);
+	return r; 
+};
+
+
+Figure.prototype.toShape=function(id, color) {
+	// convert a figure (angle and edge length) to a shape (x,y) to draw it
+	var shape=new Shape(id, color);
+	if(this.path.length==0) return shape;
+	var vangle=0;
+	if(this.path[0]=="S") vangle = 1;
+	var v=new Vector(0, 0);
+	for(var i=1; i<this.path.length; i=i+2) {
+		vangle=(vangle+12-this.path[i])%8;
+		v.add(Vector.get_vector_for_angle(vangle));
+		shape.n.push(v.clone()); 
+		// console.log("i="+i+"  angle="+this.path[i]+"  cangle="+angle+"   v:"+v.asString());
+	}
+	return shape;
+};
+
 
 Figure.prototype.combine=function(motherindex, childpiece, childindex) {
 	// combine parallelogram L 1 S 3 L 1 S 3 and small triangle L 1 S 2 S 1 with
@@ -106,9 +148,18 @@ Figure.prototype.combine=function(motherindex, childpiece, childindex) {
 	if(this.path[motherindex]!=childpiece.path[childindex]) throw "incompatible edges";
 	var combination=new Figure(this.id, this.color);
 	var mimod=0;
+	/*
 	// iterate mother-figure until link edge and copy path
 	for(var mi=0; mi < motherindex; mi++) 
 		combination.path.push(this.path[mi]);
+	*/
+	// copy elements of mother to combination
+	for(var mi=(motherindex+2)%this.path.length, i=0; 
+		i++<this.path.length-2; 
+		mi=(mi+1)%this.path.length) {
+			combination.path.push(this.path[mi]);				
+	}
+
 	// add angle
 	if(combination.path.length>1)
 		combination.path[combination.path.length-1]+=childpiece.path[childindex+1]; 
@@ -122,43 +173,8 @@ Figure.prototype.combine=function(motherindex, childpiece, childindex) {
 	}
 	// add angle
 	combination.path[combination.path.length-1] += this.path[motherindex+1]; 
-	// continue with rest of mother-figure
-	for(var mi=(motherindex+2)%this.path.length, i=0; 
-		i++<this.path.length-4+mimod; 
-		mi=(mi+1)%this.path.length) {
-			combination.path.push(this.path[mi]);				
-	}
+
 	if(mimod!=0) 
 		combination.path[combination.path.length-1]+=childpiece.path[childindex+1]; 
 	return combination;
-};
-
-Figure.prototype.isConsistent=function() {
-	// checks if to total of the inner angles fits to the number of edges and
-	// if the starting point equals the end point
-	if(this.path.length==0) return true;
-	var vangle=0; cangle=0; v=new Vector(0, 0);
-	for(var i=1; i<this.path.length; i=i+2) {
-		cangle+=this.path[i];
-		vangle=(vangle+12-this.path[i])%8;
-		v.add(Vector.get_vector_for_angle(vangle));
-	}
-	var r=(v.x==0&&v.y==0)&&(2*this.path.length-8==cangle);
-	return r; 
-};
-
-Figure.prototype.toShape=function(id, color) {
-	// convert a figure (angle and edge length) to a shape (x,y) to draw it
-	var shape=new Shape(id, color);
-	if(this.path.length==0) return shape;
-	var vangle=0;
-	if(this.path[0]=="S") angle = 1;
-	var v=new Vector(0, 0);
-	for(var i=1; i<this.path.length; i=i+2) {
-		vangle=(vangle+12-this.path[i])%8;
-		v.add(Vector.get_vector_for_angle(vangle));
-		shape.n.push(v.clone()); 
-		// console.log("i="+i+"  angle="+this.path[i]+"  cangle="+angle+"   v:"+v.asString());
-	}
-	return shape;
 };
