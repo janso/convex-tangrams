@@ -20,6 +20,8 @@ function figure_unit_test() {
 	testq2("p@0+tm@6", "L142315");
 
 	// combine parallelogram and big triangle
+	testq2("p@0+tb@0", "L14242317");
+	testq2("p@0+tb@2", "S15314424");
 	testq2("p@2+tb@4", "L13524144");
 	testq2("p@2+tb@6", "S14171334");
 

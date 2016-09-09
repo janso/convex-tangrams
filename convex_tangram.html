@@ -11,8 +11,8 @@
 	function start() {
 		var f1=new Figure().set_parallelogram();
 		var f2=new Figure().set_triangle_big();
-		var f3=f1.combine(2, f2, 8).normalize();
-		f3 = testq2("p@2+tb@8", "S14145135");
+		var f3=f1.combine(2, f2, 8);
+		f3 = testq2("p@0+tb@2", "S15314424");
 		console.log("f3:"+f3.asString());
 		
 		// transform piece to shape to draw it
@@ -25,14 +25,21 @@
 		// draw it on canvas
 		var ctx=document.getElementById("mainCanvas").getContext("2d");
 		s.draw(ctx);
+		
+		// create a new canvas area
+		// var c = document.createElement("canvas");
+		// c.setAttribute("style", "width:100px;height:60px;border:1px solid #000000;background-color:#444444;");
+		// document.getElementById("canvases").appendChild(c);
 	}
 	</script>
 </head>
 
 
 <body onload="start();">
+	<div id="canvases">
 	<canvas id="mainCanvas" width="1000" height="600" style="border:1px solid #000000;">
 	</canvas>
+	</div>
 </body>
 
 </html>

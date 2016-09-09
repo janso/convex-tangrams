@@ -51,7 +51,7 @@ Figure.combineq2 = function (testcase) {
 	var child = Figure.create_from_code(child_block[0]);
 	var child_index = parseInt(child_block[1]);
 	
-	return mother.combine(mother_index, child, child_index).normalize();
+	return mother.combine(mother_index, child, child_index);
 }
 
 Figure.prototype.asString = function () {
@@ -279,5 +279,5 @@ Figure.prototype.combine = function (motherindex, childpiece, childindex) {
 	combination.path[combination.path.length - 1] += this.path[motherindex + 1];
 	if (mimod != 0)
 		combination.path[combination.path.length - 1] += childpiece.path[childindex + 1];
-	return combination;
+	return combination.normalize();
 };
