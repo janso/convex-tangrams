@@ -8,15 +8,11 @@
 	<script src="js/test.js"></script> <!--- do unit tests -->
 	
 	<script>		
-	function start() {		
-		// ### create example for combine with multiple common edges
+	function start() {
 		var f1=new Figure().set_parallelogram();
-		console.log("f1:"+f1.asString());
-		var f2=new Figure().set_triangle_medium();
-		console.log("f2:"+f2.asString());
-		var f3=f1.combine(0, f2, 6); 
-		console.log("f3:"+f3.asString());
-		f3.normalize();
+		var f2=new Figure().set_triangle_big();
+		var f3=f1.combine(2, f2, 8).normalize();
+		f3 = testq2("p@2+tb@8", "S14145135");
 		console.log("f3:"+f3.asString());
 		
 		// transform piece to shape to draw it
