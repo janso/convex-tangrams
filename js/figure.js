@@ -37,21 +37,21 @@ Figure.create_from_code = function (code) {
 	return f;
 }
 
-// create combination of two figure using a description string in q2-syntax
-// p@2+tb@8 mean combine a parallelogram on index 2 with a big triangle on index 8
-// check test.js for more
-Figure.combineq2 = function (testcase) {
-	var figure_combination = testcase.split("+");
-	
-	var mother_block = figure_combination[0].split("@");
-	var mother = Figure.create_from_code(mother_block[0]);
-	var mother_index = parseInt(mother_block[1]);
-	
-	var child_block = figure_combination[1].split("@");
-	var child = Figure.create_from_code(child_block[0]);
-	var child_index = parseInt(child_block[1]);
-	
-	return mother.combine(mother_index, child, child_index);
+// create combination of n figures using a description string in q3-syntax
+// p+2.tb.8 mean combine a parallelogram on index 2 with a big triangle on index 8
+Figure.combineq3 = function (q3) {
+	var figure_combination = q3.split("+");
+	var first_block = figure_combination[0].split("@");
+	var figure = Figure.create_from_code(first_block[0]);
+	var next_block, figure_index, next_figure, next_index;
+	for(var i = 1; i < figure_combination.length; i++) {
+		next_block = figure_combination[i].split(".");
+		figure_index = parseInt(next_block[0]);
+		next_figure= Figure.create_from_code(next_block[1]);
+		next_index = parseInt(next_block[2]);
+		figure = figure.combine(figure_index, next_figure, next_index);
+	}
+	return figure;
 }
 
 Figure.prototype.asString = function () {
