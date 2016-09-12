@@ -11,10 +11,20 @@ var Figure = function (id, color) {
 	this.id = id;
 	this.color = color;
 	this.hash = 0; // hash is calculated in normalize
+	this.q3 = "";
+};
+
+Figure.prototype.clone = function () {
+	var clone = new Figure(this.id, this.color);
+	clone.path = this.path.slice(0); // clone array
+	clone.hash = this.hash;
+	clone.q3 = this.q3;
+	return clone;
 };
 
 Figure.create_from_code = function (code) {
 	var f = new Figure();
+	f.q3 = code;
 	switch (code) {
 	case "p":
 		f.set_parallelogram();
@@ -43,13 +53,17 @@ Figure.combineq3 = function (q3) {
 	var figure_combination = q3.split("+");
 	var first_block = figure_combination[0].split("@");
 	var figure = Figure.create_from_code(first_block[0]);
-	var next_block, figure_index, next_figure, next_index;
-	for(var i = 1; i < figure_combination.length; i++) {
+	var next_block,
+	figure_index,
+	next_figure,
+	next_index;
+	for (var i = 1; i < figure_combination.length; i++) {
 		next_block = figure_combination[i].split(".");
 		figure_index = parseInt(next_block[0]);
-		next_figure= Figure.create_from_code(next_block[1]);
+		next_figure = Figure.create_from_code(next_block[1]);
 		next_index = parseInt(next_block[2]);
 		figure = figure.combine(figure_index, next_figure, next_index);
+		figure.q3 = figure.q3 + "+" + figure_index + "." + next_figure.q3 + "." + next_index;
 	}
 	return figure;
 }
@@ -59,14 +73,24 @@ Figure.prototype.asString = function () {
 	this.path.forEach(function (e) {
 		r = r + e + " "
 	})
+	
+	// Q3
+	if (this.q3 == "")
+		r = r + "   no Q3!";
+	else
+		r = r + "   Q3 = " + this.q3;
+	
+	// hash
 	if (this.hash == 0)
-		r = r + " no hash";
+		r = r + "   no hash!";
 	else
-		r = r + " #" + this.hash;
+		r = r + "   hash = " + this.hash;
+
+	// consistency
 	if (this.isConsistent())
-		r = r + " (consistent)";
+		r = r + "   (consistent)";
 	else
-		r = r + " INCONSISTENT!";
+		r = r + "   INCONSISTENT!";
 	return r;
 }
 
@@ -98,10 +122,6 @@ Figure.prototype.set_parallelogram = function () {
 Figure.prototype.set_test = function () {
 	this.path = ['S', 4, 'S', 1, 'L', 3, 'S', 3, 'L', 1, 'S', 4, ];
 	return this;
-};
-
-Figure.prototype.clone = function () {
-	return new Figure(this.id, this.color).path = this.path.slice(0); // clone array
 };
 
 Figure.prototype.normalize = function () {
@@ -254,6 +274,7 @@ Figure.prototype.combine = function (motherindex, childpiece, childindex) {
 
 	// acutal combination
 	var combination = new Figure(this.id, this.color);
+	combination.q3 = this.q3;
 	var mimod = 0;
 	// copy elements of mother to combination
 	for (var mi = (motherindex + 2) % this.path.length, i = 0;
