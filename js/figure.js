@@ -79,31 +79,6 @@ Figure.prototype.asString = function () {
 	return r;
 }
 
-Figure.prototype.toShape = function () {
-	// convert a figure (angle and edge length) to a shape (x,y) to draw it
-	var shape = new Shape(1, "#202020");
-	if (this.path.length == 0)
-		return shape;
-	var vangle = 0;
-	if (this.path[0] == "S")
-		vangle = 1;
-	var v = new Vector(0, 0);
-	for (var i = 1; i < this.path.length; i = i + 2) {
-		vangle = (vangle + 12 - this.path[i]) % 8;
-		v.add(Vector.get_vector_for_angle(vangle));
-		shape.n.push(v.clone());
-	}
-	// resort nodes of shape
-	var n = [],
-	j = 0;
-	for (var i = 0; i < shape.n.length; i++) {
-		j = (i + shape.n.length - 1) % shape.n.length;
-		n.push(shape.n[j]);
-	}
-	shape.n = n;
-	return shape;
-};
-
 Figure.prototype.set_triangle_small = function () {
 	this.path = ['L', 1, 'S', 2, 'S', 1];
 	return this;
@@ -132,6 +107,23 @@ Figure.prototype.set_parallelogram = function () {
 Figure.prototype.set_test = function () {
 	this.path = ['S', 4, 'S', 1, 'L', 3, 'S', 3, 'L', 1, 'S', 4, ];
 	return this;
+};
+
+Figure.prototype.toShape = function () {
+	// convert a figure (angle and edge length) to a shape (x,y) to draw it
+	var shape = new Shape(1, "#202020");
+	if (this.path.length == 0)
+		return shape;
+	var vangle = 0;
+	if (this.path[0] == "S")
+		vangle = 1;
+	var v = new Vector(0, 0);
+	for (var i = 1; i < this.path.length; i = i + 2) {
+		vangle = (vangle + 12 - this.path[i]) % 8;
+		v.add(Vector.get_vector_for_angle(vangle));
+		shape.n.push(v.clone());
+	}
+	return shape;
 };
 
 Figure.prototype.isConsistent = function () {
@@ -218,26 +210,6 @@ Figure.prototype.normalize = function () {
 	return this;
 };
 
-// create combination of n figures using a description string in q3-syntax
-// p+2.tb.8 mean combine a parallelogram on index 2 with a big triangle on index 8
-Figure.combineQ3 = function (q3) {
-	var figure_combination = q3.split("+");
-	var first_block = figure_combination[0].split("@");
-	var figure = Figure.CreateFromCode(first_block[0]);
-	var next_block;
-	var figure_index;
-	var next_figure;
-	var next_index;
-	for (var i = 1; i < figure_combination.length; i++) {
-		next_block = figure_combination[i].split(".");
-		figure_index = parseInt(next_block[0]);
-		next_figure = Figure.CreateFromCode(next_block[1]);
-		next_index = parseInt(next_block[2]);
-		figure = figure.combine(figure_index, next_figure, next_index);
-	}
-	return figure;
-}
-
 Figure.prototype.combine = function (motherindex, childpiece, childindex) {
 	// combine parallelogram L 1 S 3 L 1 S 3 and small triangle L 1 S 2 S 1 with
 	// motherindex 2: L 1 |S| 3 L 1 S 3 and childindex 2: L 1 |S| 2 S 1.
@@ -299,7 +271,43 @@ Figure.prototype.combine = function (motherindex, childpiece, childindex) {
 	// calculate second link angle
 	combination.path[combination.path.length - 1] += this.path[this.previousPathIndex(mis)];
 
-	// normalize
-	combination.normalize();
 	return combination;
 };
+
+// create combination of n figures using a description string in q3-syntax
+// p+2.tb.8 mean combine a parallelogram on index 2 with a big triangle on index 8
+Figure.combineQ3 = function (q3) {
+	var figure_combination = q3.split("+");
+	var first_block = figure_combination[0].split("@");
+	var figure = Figure.CreateFromCode(first_block[0]);
+	var next_block;
+	var figure_index;
+	var next_figure;
+	var next_index;
+	for (var i = 1; i < figure_combination.length; i++) {
+		next_block = figure_combination[i].split(".");
+		figure_index = parseInt(next_block[0]);
+		next_figure = Figure.CreateFromCode(next_block[1]);
+		next_index = parseInt(next_block[2]);
+		figure = figure.combine(figure_index, next_figure, next_index);
+		figure.normalize();
+	}
+	return figure;
+}
+
+Figure.drawQ3 = function (ctx, q3) {
+	var figure_combination = q3.split("+");
+	var first_block = figure_combination[0].split("@");
+	var figure = Figure.CreateFromCode(first_block[0]);
+	var next_block;
+	var figure_index;
+	var next_figure;
+	var next_index;
+	for (var i = 1; i < figure_combination.length; i++) {
+		next_block = figure_combination[i].split(".");
+		figure_index = parseInt(next_block[0]);
+		next_figure = Figure.CreateFromCode(next_block[1]);
+		next_index = parseInt(next_block[2]);
+		// ### draw with info figure_index, next_figure, next_index
+	}
+}

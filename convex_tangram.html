@@ -9,21 +9,20 @@
 	
 	<script>		
 	function start() {
-		var f = Figure.combineQ3("p+2.tb.8+10.ts.0+12.tb.4"); 
-		var c = Figure.CreateFromCode("s");
-		f = f.combine(8, c, 0);
+		var f = Figure.combineQ3("p+2.tb.10+0.ts.0+2.tb.10+4.s.0+2.ts.4+4.tm.4"); 
 		console.log(f.asString());		
 		
 		// transform piece to shape to draw it
 		var s=f.toShape(0, "#000000");
 		// create a transformation matrix to transform the shape in a display-able format
-		Matrix.get_translation(240, 120)
+		Matrix.get_translation(240, 240)
 			.multiply_matrix(Matrix.get_scale(-32, 32))
 			.multiply_matrix(Matrix.get_rotate(Math.PI+0.085))
 			.transform_shape(s);
 		// draw it on canvas
 		var ctx=document.getElementById("mainCanvas").getContext("2d");
 		s.draw(ctx);
+		s.inscribeNode(ctx);
 		
 		// create a new canvas area
 		// var c = document.createElement("canvas");

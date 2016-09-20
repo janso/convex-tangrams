@@ -36,6 +36,10 @@ function figure_unit_test() {
 	testq3("p+2.tb.8+10.ts.0+12.tb.4+8.s.2", "S14164414335");
 	testq3("p+2.tb.8+10.ts.0+12.tb.4+8.s.4", "S14164414335");
 	testq3("p+2.tb.8+10.ts.0+12.tb.4+8.s.6", "S14164414335");
+	
+	// big figures
+	testq3("p+2.tb.10+0.ts.0+2.tb.10+4.s.0+2.ts.4+4.tm.4", "L24242424");
+	
 }
 
 function testq3(testcase, hash) {
