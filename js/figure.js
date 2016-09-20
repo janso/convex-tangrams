@@ -279,7 +279,7 @@ Figure.prototype.combine = function (motherindex, childpiece, childindex) {
 	// iterate mother piece until link edge (motherindex), add angle and
 	// continue with childpiece (modulo).
 	// At the end of the child piece add angles and continue with rest of mother piece.
-
+ 
 	// checks
 	if (!(this.path[motherindex] == "S" || this.path[motherindex] == "L"))
 		throw "index not for edge in mother";
