@@ -17,7 +17,7 @@
 		// transform piece to shape to draw it
 		var s=f.toShape(0, "#000000");
 		// create a transformation matrix to transform the shape in a display-able format
-		Matrix.get_translation(150, 80)
+		Matrix.get_translation(200, 200)
 			.multiply_matrix(Matrix.get_scale(-32, 32))
 			.multiply_matrix(Matrix.get_rotate(Math.PI+0.085))
 			.transform_shape(s);

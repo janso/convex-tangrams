@@ -45,13 +45,13 @@ Figure.prototype.clone = function () {
 	return clone;
 };
 
-Figure.prototype.next_path_index = function (i) {
+Figure.prototype.nextPathIndex = function (i) {
 	if (++i > this.path.lenght)
 		i = 0;
 	return i;
 }
 
-Figure.prototype.previous_path_index = function (i) {
+Figure.prototype.previousPathIndex = function (i) {
 	if (--i < 0)
 		i = this.path.length - 1;
 	return i;
@@ -79,9 +79,8 @@ Figure.prototype.asString = function () {
 	try {
 		var consistent = this.isConsistent();
 		r = r + "   (consistent)";
-	}
-	catch(err) {
-		r = r + "   INCONSISTENT ("+err+")"
+	} catch (err) {
+		r = r + "   INCONSISTENT (" + err + ")"
 	};
 	return r;
 }
@@ -162,17 +161,19 @@ Figure.prototype.isConsistent = function () {
 		throw "total of inner angels doesn't fit to number of nodes";
 
 	// check the structure of path
+	if (this.path.length % 2 != 0)
+		throw "Length of path is not even";
 	var edge = true;
 	var angle = true;
 	for (var i = 0; i < this.path.length; i++) {
 		if (i % 2 == 0) {
 			// check edges
 			if (!((this.path[i] == "S") || (this.path[i] == "L")))
-				throw "Invalid edge at index "+i;
+				throw "Invalid edge at index " + i;
 		} else {
 			// check angles
 			if (this.path[i] < 1 || this.path[i] > 6)
-				throw "Invalid angle of "+this.path[i]+" at index "+i;
+				throw "Invalid angle of " + this.path[i] + " at index " + i;
 		}
 	}
 	return true;
@@ -325,32 +326,31 @@ Figure.prototype.combine = function (motherindex, childpiece, childindex) {
 	var cis = (childindex + 2) % childpiece.path.length; // start index on child piece
 	var cie = childindex; // end index on child piece
 
-	/*
-	// modify foreward ###
-	var mlookahead = (mis + 1) % this.path.length;
-	var clookahead = (cis + 1) % childpiece.path.length;
+	// modify mother-foreward
+	var mlookahead = (mis + this.path.length - 1) % this.path.length; // point on next angle of mother piece
+	var clookahead = (cie + childpiece.path.length - 1) % childpiece.path.length; // point on previous angle in child
 	while (this.path[mlookahead] == (8 - childpiece.path[clookahead])) {
 		mis = (mis + 2) % this.path.length;
-		cis = (cis + 2) % childpiece.path.length;
-	    mlookahead = (mlookahead + 2) % this.path.length;
-	    clookahead = (clookahead + 2) % childpiece.path.length;		
+		cie = (cie + childpiece.path.length - 2) % childpiece.path.length;
+		mlookahead = (mlookahead + 2) % this.path.length;
+		clookahead = (clookahead + childpiece.path.length - 2) % childpiece.path.length;
 	}
 
+	/*
 	// modify backward ###
 	mlookahead = (mie + 1) % this.path.length;
 	clookahead = (cie + 1) % childpiece.path.length;
 	while (this.path[mlookahead] == (8 - childpiece.path[clookahead])) {
-		mie = (mie + this.path.length - 2) % this.path.length;
-		cie = (cie + childpiece.path.length - 2) % childpiece.path.length;
-	    mlookahead = (mlookahead + this.path.length - 2) % this.path.length;
-	    clookahead = (clookahead + childpiece.path.length - 2) % childpiece.path.length;		
+	mie = (mie + this.path.length - 2) % this.path.length;
+	cie = (cie + childpiece.path.length - 2) % childpiece.path.length;
+	mlookahead = (mlookahead + this.path.length - 2) % this.path.length;
+	clookahead = (clookahead + childpiece.path.length - 2) % childpiece.path.length;
 	}
-	*/
+	 */
 
-	// acutal combination
-	var combination = new Figure(this.id, this.color);
+	// create new figure for combination
+	var combination = new Figure();
 	combination.q3 = this.q3;
-	var mimod = 0;
 
 	// copy elements of mother to combination
 	for (var i = mis; i != mie; i = (i + 1) % this.path.length) {
@@ -358,10 +358,7 @@ Figure.prototype.combine = function (motherindex, childpiece, childindex) {
 	}
 
 	// calculate first link angle
-	if (combination.path.length > 1) {
-		combination.path[combination.path.length - 1] += childpiece.path[cie + 1];
-	} else
-		mimod = 2;
+	combination.path[combination.path.length - 1] += childpiece.path[childpiece.previousPathIndex(cis)];
 
 	// copy elements from child piece to combination
 	for (var i = cis; i != cie; i = (i + 1) % childpiece.path.length) {
@@ -369,9 +366,7 @@ Figure.prototype.combine = function (motherindex, childpiece, childindex) {
 	}
 
 	// calculate second link angle
-	combination.path[combination.path.length - 1] += this.path[mie + 1];
-	if (mimod != 0)
-		combination.path[combination.path.length - 1] += childpiece.path[cie + 1];
+	combination.path[combination.path.length - 1] += this.path[this.previousPathIndex(mis)];
 
 	// normalize
 	return combination.normalize();
