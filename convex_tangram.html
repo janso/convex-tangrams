@@ -9,13 +9,15 @@
 	
 	<script>		
 	function start() {
-		var f = Figure.combineq3("p+2.tb.8+8.ts.2");
-		console.log(f.asString());
+		var f = Figure.CreateFromCode("tm"); 
+		var c = Figure.CreateFromCode("tm");
+		f = f.combine(2, c, 4);
+		console.log(f.asString());		
 		
 		// transform piece to shape to draw it
-		var s=f.toShape(0, "#fa6666");
+		var s=f.toShape(0, "#000000");
 		// create a transformation matrix to transform the shape in a display-able format
-		Matrix.get_translation(200, 200)
+		Matrix.get_translation(150, 80)
 			.multiply_matrix(Matrix.get_scale(-32, 32))
 			.multiply_matrix(Matrix.get_rotate(Math.PI+0.085))
 			.transform_shape(s);
@@ -25,16 +27,16 @@
 		
 		// create a new canvas area
 		// var c = document.createElement("canvas");
-		// c.setAttribute("style", "width:100px;height:60px;border:1px solid #000000;background-color:#444444;");
+		// c.setAttribute("style", "width:320px;height:320px;background-color:#202020;");
 		// document.getElementById("canvases").appendChild(c);
 	}
 	</script>
 </head>
 
 
-<body onload="start();">
+<body style="background-color:#000000; color:#eaeaea; font-family:arial" onload="start();">
 	<div id="canvases">
-	<canvas id="mainCanvas" width="1000" height="600" style="border:1px solid #000000;">
+	<canvas id="mainCanvas" width="320" height="320" style="background-color:#202020;">
 	</canvas>
 	</div>
 </body>

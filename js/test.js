@@ -25,7 +25,8 @@ function figure_unit_test() {
 	testq3("p+2.tb.4", "L13524144");
 	testq3("p+2.tb.6", "S14171334");
 	
-	console.log("unit tests passed");
+	// combination with two overlapping edges
+	// testq3("tb+4.tb.8+8.s.0", "S141622824145"); // ### hash is incorrect
 }
 
 function testq3(testcase, hash) {

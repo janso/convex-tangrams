@@ -12,14 +12,17 @@ Shape.prototype.draw = function(ctx) {
 	// draw shape (as filled polygon)
 	ctx.fillStyle = this.color;
 	ctx.beginPath();
+	ctx.lineWidth="1";
+	ctx.strokeStyle="#999999";
 	ctx.moveTo(this.n[0].x, this.n[0].y);
 	for( var i = 0; i < this.n.length; i++) { ctx.lineTo(this.n[i].x, this.n[i].y); }
 	ctx.closePath();
 	ctx.fill();
+	ctx.stroke();
 	
 	// write number of node
 	ctx.font = "11px Arial";
-	ctx.fillStyle = "#000000";
+	ctx.fillStyle = "#00d000";
 	for( var i = 0; i < this.n.length; i++) { 
 		ctx.fillText(""+i, this.n[i].x+3,this.n[i].y+4);
 	}			

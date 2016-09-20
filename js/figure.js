@@ -1,28 +1,18 @@
 // --------------------------------------------------------------------
 // class Figure
 // --------------------------------------------------------------------
-var Figure = function (id, color) {
+var Figure = function () {
 	this.path = [];
 	// the path is a sequence of length of edges and inner angles
 	// the length of the edge can be L for long edges and S for short edges
 	// L=sqrt(2) * S
 	// the angle can be any value 0-7 were 0=0°, 1=45°, 2=90°, ...
 	// [ 'S', 1, 'L', 1, 'S', 2 ] would be tangram's small triangle
-	this.id = id;
-	this.color = color;
 	this.hash = 0; // hash is calculated in normalize
 	this.q3 = "";
 };
 
-Figure.prototype.clone = function () {
-	var clone = new Figure(this.id, this.color);
-	clone.path = this.path.slice(0); // clone array
-	clone.hash = this.hash;
-	clone.q3 = this.q3;
-	return clone;
-};
-
-Figure.create_from_code = function (code) {
+Figure.CreateFromCode = function (code) {
 	var f = new Figure();
 	f.q3 = code;
 	switch (code) {
@@ -47,25 +37,24 @@ Figure.create_from_code = function (code) {
 	return f;
 }
 
-// create combination of n figures using a description string in q3-syntax
-// p+2.tb.8 mean combine a parallelogram on index 2 with a big triangle on index 8
-Figure.combineq3 = function (q3) {
-	var figure_combination = q3.split("+");
-	var first_block = figure_combination[0].split("@");
-	var figure = Figure.create_from_code(first_block[0]);
-	var next_block,
-	figure_index,
-	next_figure,
-	next_index;
-	for (var i = 1; i < figure_combination.length; i++) {
-		next_block = figure_combination[i].split(".");
-		figure_index = parseInt(next_block[0]);
-		next_figure = Figure.create_from_code(next_block[1]);
-		next_index = parseInt(next_block[2]);
-		figure = figure.combine(figure_index, next_figure, next_index);
-		figure.q3 = figure.q3 + "+" + figure_index + "." + next_figure.q3 + "." + next_index;
-	}
-	return figure;
+Figure.prototype.clone = function () {
+	var clone = new Figure(this.id, this.color);
+	clone.path = this.path.slice(0); // clone array
+	clone.hash = this.hash;
+	clone.q3 = this.q3;
+	return clone;
+};
+
+Figure.prototype.next_path_index = function (i) {
+	if (++i > this.path.lenght)
+		i = 0;
+	return i;
+}
+
+Figure.prototype.previous_path_index = function (i) {
+	if (--i < 0)
+		i = this.path.length - 1;
+	return i;
 }
 
 Figure.prototype.asString = function () {
@@ -87,16 +76,19 @@ Figure.prototype.asString = function () {
 		r = r + "   hash = " + this.hash;
 
 	// consistency
-	if (this.isConsistent())
+	try {
+		var consistent = this.isConsistent();
 		r = r + "   (consistent)";
-	else
-		r = r + "   INCONSISTENT!";
+	}
+	catch(err) {
+		r = r + "   INCONSISTENT ("+err+")"
+	};
 	return r;
 }
 
-Figure.prototype.toShape = function (id, color) {
+Figure.prototype.toShape = function () {
 	// convert a figure (angle and edge length) to a shape (x,y) to draw it
-	var shape = new Shape(id, color);
+	var shape = new Shape(1, "#202020");
 	if (this.path.length == 0)
 		return shape;
 	var vangle = 0;
@@ -164,8 +156,26 @@ Figure.prototype.isConsistent = function () {
 		vangle = (vangle + 12 - this.path[i]) % 8;
 		v.add(Vector.get_vector_for_angle(vangle));
 	}
-	var r = (v.x == 0 && v.y == 0) && (2 * this.path.length - 8 == cangle);
-	return r;
+	if (v.x != 0 || v.y != 0)
+		throw "starting point not equal to endpoint";
+	if (2 * this.path.length - 8 != cangle)
+		throw "total of inner angels doesn't fit to number of nodes";
+
+	// check the structure of path
+	var edge = true;
+	var angle = true;
+	for (var i = 0; i < this.path.length; i++) {
+		if (i % 2 == 0) {
+			// check edges
+			if (!((this.path[i] == "S") || (this.path[i] == "L")))
+				throw "Invalid edge at index "+i;
+		} else {
+			// check angles
+			if (this.path[i] < 1 || this.path[i] > 6)
+				throw "Invalid angle of "+this.path[i]+" at index "+i;
+		}
+	}
+	return true;
 };
 
 Figure.prototype.normalize = function () {
@@ -212,6 +222,27 @@ Figure.prototype.normalize = function () {
 	this.path = norm_path; // use normalized path
 	return this;
 };
+
+// create combination of n figures using a description string in q3-syntax
+// p+2.tb.8 mean combine a parallelogram on index 2 with a big triangle on index 8
+Figure.combineq3 = function (q3) {
+	var figure_combination = q3.split("+");
+	var first_block = figure_combination[0].split("@");
+	var figure = Figure.CreateFromCode(first_block[0]);
+	var next_block;
+	var figure_index;
+	var next_figure;
+	var next_index;
+	for (var i = 1; i < figure_combination.length; i++) {
+		next_block = figure_combination[i].split(".");
+		figure_index = parseInt(next_block[0]);
+		next_figure = Figure.CreateFromCode(next_block[1]);
+		next_index = parseInt(next_block[2]);
+		figure = figure.combine(figure_index, next_figure, next_index);
+		figure.q3 = figure.q3 + "+" + figure_index + "." + next_figure.q3 + "." + next_index;
+	}
+	return figure;
+}
 
 Figure.prototype.combine_simple = function (motherindex, childpiece, childindex) {
 	// combine_simple is the first working version of combine.
@@ -279,7 +310,7 @@ Figure.prototype.combine = function (motherindex, childpiece, childindex) {
 	// iterate mother piece until link edge (motherindex), add angle and
 	// continue with childpiece (modulo).
 	// At the end of the child piece add angles and continue with rest of mother piece.
- 
+
 	// checks
 	if (!(this.path[motherindex] == "S" || this.path[motherindex] == "L"))
 		throw "index not for edge in mother";
@@ -293,19 +324,37 @@ Figure.prototype.combine = function (motherindex, childpiece, childindex) {
 	var mie = motherindex; // end index on mother piece
 	var cis = (childindex + 2) % childpiece.path.length; // start index on child piece
 	var cie = childindex; // end index on child piece
-	// ### finalize while... then make testcase
-	while (this.path[mis + 1] == (8 - childpiece.path[cie + 1] ) ) {
-		mis += 2; cie += 2;
+
+	/*
+	// modify foreward ###
+	var mlookahead = (mis + 1) % this.path.length;
+	var clookahead = (cis + 1) % childpiece.path.length;
+	while (this.path[mlookahead] == (8 - childpiece.path[clookahead])) {
+		mis = (mis + 2) % this.path.length;
+		cis = (cis + 2) % childpiece.path.length;
+	    mlookahead = (mlookahead + 2) % this.path.length;
+	    clookahead = (clookahead + 2) % childpiece.path.length;		
 	}
-	
+
+	// modify backward ###
+	mlookahead = (mie + 1) % this.path.length;
+	clookahead = (cie + 1) % childpiece.path.length;
+	while (this.path[mlookahead] == (8 - childpiece.path[clookahead])) {
+		mie = (mie + this.path.length - 2) % this.path.length;
+		cie = (cie + childpiece.path.length - 2) % childpiece.path.length;
+	    mlookahead = (mlookahead + this.path.length - 2) % this.path.length;
+	    clookahead = (clookahead + childpiece.path.length - 2) % childpiece.path.length;		
+	}
+	*/
+
 	// acutal combination
 	var combination = new Figure(this.id, this.color);
 	combination.q3 = this.q3;
 	var mimod = 0;
 
 	// copy elements of mother to combination
-	for (var mi = mis; mi != mie; mi = (mi + 1) % this.path.length) {
-		combination.path.push(this.path[mi]);
+	for (var i = mis; i != mie; i = (i + 1) % this.path.length) {
+		combination.path.push(this.path[i]);
 	}
 
 	// calculate first link angle
@@ -315,8 +364,8 @@ Figure.prototype.combine = function (motherindex, childpiece, childindex) {
 		mimod = 2;
 
 	// copy elements from child piece to combination
-	for (var ci = cis; ci != cie; ci = (ci + 1) % childpiece.path.length) {
-		combination.path.push(childpiece.path[ci]);
+	for (var i = cis; i != cie; i = (i + 1) % childpiece.path.length) {
+		combination.path.push(childpiece.path[i]);
 	}
 
 	// calculate second link angle
