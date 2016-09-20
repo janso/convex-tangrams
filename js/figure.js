@@ -63,12 +63,6 @@ Figure.prototype.asString = function () {
 		r = r + e + " "
 	})
 
-	// Q3
-	if (this.q3 == "")
-		r = r + "   no Q3!";
-	else
-		r = r + "   Q3 = " + this.q3;
-
 	// hash
 	if (this.hash == 0)
 		r = r + "   no hash!";
@@ -240,7 +234,6 @@ Figure.combineQ3 = function (q3) {
 		next_figure = Figure.CreateFromCode(next_block[1]);
 		next_index = parseInt(next_block[2]);
 		figure = figure.combine(figure_index, next_figure, next_index);
-		figure.q3 = figure.q3 + "+" + figure_index + "." + next_figure.q3 + "." + next_index;
 	}
 	return figure;
 }
@@ -289,7 +282,6 @@ Figure.prototype.combine = function (motherindex, childpiece, childindex) {
 
 	// create new figure for combination
 	var combination = new Figure();
-	combination.q3 = this.q3;
 
 	// copy elements of mother to combination
 	for (var i = mis; i != mie; i = (i + 1) % this.path.length) {
@@ -308,5 +300,6 @@ Figure.prototype.combine = function (motherindex, childpiece, childindex) {
 	combination.path[combination.path.length - 1] += this.path[this.previousPathIndex(mis)];
 
 	// normalize
-	return combination.normalize();
+	combination.normalize();
+	return combination;
 };

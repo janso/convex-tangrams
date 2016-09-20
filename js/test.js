@@ -30,6 +30,12 @@ function figure_unit_test() {
 	testq3("tb+6.tb.4", "S14341434");
 	testq3("tb+0.tb.2", "S24242424");
 	testq3("tb+2.tb.0", "S24242424");
+	
+	// combination with three overlapping edges
+	testq3("p+2.tb.8+10.ts.0+12.tb.4+8.s.0", "S14164414335");
+	testq3("p+2.tb.8+10.ts.0+12.tb.4+8.s.2", "S14164414335");
+	testq3("p+2.tb.8+10.ts.0+12.tb.4+8.s.4", "S14164414335");
+	testq3("p+2.tb.8+10.ts.0+12.tb.4+8.s.6", "S14164414335");
 }
 
 function testq3(testcase, hash) {
