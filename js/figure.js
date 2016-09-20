@@ -226,7 +226,7 @@ Figure.prototype.normalize = function () {
 
 // create combination of n figures using a description string in q3-syntax
 // p+2.tb.8 mean combine a parallelogram on index 2 with a big triangle on index 8
-Figure.combineq3 = function (q3) {
+Figure.combineQ3 = function (q3) {
 	var figure_combination = q3.split("+");
 	var first_block = figure_combination[0].split("@");
 	var figure = Figure.CreateFromCode(first_block[0]);
@@ -244,65 +244,6 @@ Figure.combineq3 = function (q3) {
 	}
 	return figure;
 }
-
-Figure.prototype.combine_simple = function (motherindex, childpiece, childindex) {
-	// combine_simple is the first working version of combine.
-	// It is limited to combine figures that share exactly one edge:
-	// combine is in development - without the limitation
-
-	// combine parallelogram L 1 S 3 L 1 S 3 and small triangle L 1 S 2 S 1 with
-	// motherindex 2: L 1 |S| 3 L 1 S 3 and childindex 2: L 1 |S| 2 S 1.
-	// result shall be L 3 S 1 L 4 L 1 S 3.
-	// iterate mother piece until link edge (motherindex), add angle and
-	// continue with childpiece (modulo).
-	// At the end of the child piece add angles and continue with rest of mother piece.
-
-	// checks
-	// combine parallelogram L 1 S 3 L 1 S 3 and small triangle L 1 S 2 S 1 with
-	// motherindex 2: L 1 |S| 3 L 1 S 3 and childindex 2: L 1 |S| 2 S 1.
-	// result shall be L 3 S 1 L 4 L 1 S 3.
-	// iterate mother piece until link edge (motherindex), add angle and
-	// continue with childpiece (modulo).
-	// At the end of the child piece add angles and continue with rest of mother piece.
-
-	// checks
-	if (!(this.path[motherindex] == "S" || this.path[motherindex] == "L"))
-		throw "index not for edge in mother";
-	if (!(childpiece.path[childindex] == "S" || childpiece.path[childindex] == "L"))
-		throw "index not for edge in child";
-	if (this.path[motherindex] != childpiece.path[childindex])
-		throw "incompatible edges";
-
-	// acutal combination
-	var combination = new Figure(this.id, this.color);
-	combination.q3 = this.q3;
-	var mimod = 0;
-	// copy elements of mother to combination
-	for (var mi = (motherindex + 2) % this.path.length, i = 0;
-		i++ < this.path.length - 2;
-		mi = (mi + 1) % this.path.length) {
-		combination.path.push(this.path[mi]);
-	}
-
-	// add angle
-	if (combination.path.length > 1) {
-		var child_angle_index = childindex + 1;
-		var child_angle = childpiece.path[child_angle_index];
-		combination.path[combination.path.length - 1] += child_angle;
-	} else
-		mimod = 2;
-	// iterate child-figure (modulo) beginning from link edge
-	for (var ci = (childindex + 2) % childpiece.path.length, i = 0;
-		i++ < childpiece.path.length - 2;
-		ci = (ci + 1) % childpiece.path.length) {
-		combination.path.push(childpiece.path[ci]);
-	}
-	// add angle
-	combination.path[combination.path.length - 1] += this.path[motherindex + 1];
-	if (mimod != 0)
-		combination.path[combination.path.length - 1] += childpiece.path[childindex + 1];
-	return combination.normalize();
-};
 
 Figure.prototype.combine = function (motherindex, childpiece, childindex) {
 	// combine parallelogram L 1 S 3 L 1 S 3 and small triangle L 1 S 2 S 1 with
@@ -326,9 +267,9 @@ Figure.prototype.combine = function (motherindex, childpiece, childindex) {
 	var cis = (childindex + 2) % childpiece.path.length; // start index on child piece
 	var cie = childindex; // end index on child piece
 
-	// modify mother-foreward
+	// modify mother-foreward, update start-index of mother piece (mis) and end-index in child piece (cie)
 	var mlookahead = (mis + this.path.length - 1) % this.path.length; // point on next angle of mother piece
-	var clookahead = (cie + childpiece.path.length - 1) % childpiece.path.length; // point on previous angle in child
+	var clookahead = (cie + childpiece.path.length - 1) % childpiece.path.length; // point on next angle in child
 	while (this.path[mlookahead] == (8 - childpiece.path[clookahead])) {
 		mis = (mis + 2) % this.path.length;
 		cie = (cie + childpiece.path.length - 2) % childpiece.path.length;
@@ -336,17 +277,15 @@ Figure.prototype.combine = function (motherindex, childpiece, childindex) {
 		clookahead = (clookahead + childpiece.path.length - 2) % childpiece.path.length;
 	}
 
-	/*
-	// modify backward ###
-	mlookahead = (mie + 1) % this.path.length;
-	clookahead = (cie + 1) % childpiece.path.length;
+	// modify mother-backward, update end-index of mother piece (mie) and start-index in child piece (cis)
+	mlookahead = (mie + this.path.length - 1) % this.path.length; // point on previous angle of mother piece
+	clookahead = (cis + childpiece.path.length - 1) % childpiece.path.length; // point on previous angle in child
 	while (this.path[mlookahead] == (8 - childpiece.path[clookahead])) {
-	mie = (mie + this.path.length - 2) % this.path.length;
-	cie = (cie + childpiece.path.length - 2) % childpiece.path.length;
-	mlookahead = (mlookahead + this.path.length - 2) % this.path.length;
-	clookahead = (clookahead + childpiece.path.length - 2) % childpiece.path.length;
+		mie = (mie + this.path.length - 2) % this.path.length;
+		cis = (cis + 2) % childpiece.path.length;
+		mlookahead = (mlookahead + this.path.length - 2) % this.path.length;
+		clookahead = (clookahead + 2) % childpiece.path.length;
 	}
-	 */
 
 	// create new figure for combination
 	var combination = new Figure();

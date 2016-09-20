@@ -9,15 +9,15 @@
 	
 	<script>		
 	function start() {
-		var f = Figure.CreateFromCode("tm"); 
-		var c = Figure.CreateFromCode("tm");
-		f = f.combine(2, c, 4);
+		var f = Figure.CreateFromCode("tb"); 
+		var c = Figure.CreateFromCode("tb");
+		f = f.combine(2, c, 0);
 		console.log(f.asString());		
 		
 		// transform piece to shape to draw it
 		var s=f.toShape(0, "#000000");
 		// create a transformation matrix to transform the shape in a display-able format
-		Matrix.get_translation(200, 200)
+		Matrix.get_translation(240, 120)
 			.multiply_matrix(Matrix.get_scale(-32, 32))
 			.multiply_matrix(Matrix.get_rotate(Math.PI+0.085))
 			.transform_shape(s);
