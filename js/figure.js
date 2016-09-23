@@ -330,9 +330,9 @@ Figure.drawQ3 = function (ctx, q3) {
 	});
 
 	// create a transformation matrix to transform shapes in a display-able format
-	var matrix = Matrix.getScale(32, 32);
+	var matrix = Matrix.getTranslation(10, 10);
+	matrix.multiplyMatrix(Matrix.getScale(32, 32));
 	//var matrix = Matrix.getTranslation(-norm.x, -norm.y);
-	//matrix.multiplyMatrix(Matrix.getTranslation(10, 10));
 	//matrix.multiplyMatrix(Matrix.getRotate(Math.PI + 0.085));
 		
 	// draw shapes on canvas
