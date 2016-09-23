@@ -1,20 +1,18 @@
 // --------------------------------------------------------------------
 // class Shape
 // --------------------------------------------------------------------
-var Shape = function (id, color) {
-	this.id = id;
-	this.color = color;
+var Shape = function () {
 	this.n = [];
 };
 
 Shape.prototype.clone = function () {
-	var s = new Shape(this.id, this.color);
+	var s = new Shape();
 	s.n = this.n.slice(0);
 	return s;
 };
+
 Shape.prototype.draw = function (ctx) {
-	// draw shape (as filled polygon)
-	ctx.fillStyle = this.color;
+	// draw shape (as polygon)
 	ctx.beginPath();
 	ctx.lineWidth = "1";
 	ctx.strokeStyle = "#999999";
@@ -23,10 +21,10 @@ Shape.prototype.draw = function (ctx) {
 		ctx.lineTo(this.n[i].x, this.n[i].y);
 	}
 	ctx.closePath();
-	ctx.fill();
 	ctx.stroke();
 };
-Shape.prototype.inscribeNode = function (ctx) {
+
+Shape.prototype.drawNodeIncription = function (ctx) {
 	ctx.font = "11px Arial";
 	ctx.fillStyle = "#00d000";
 	var nodeText;
@@ -35,16 +33,19 @@ Shape.prototype.inscribeNode = function (ctx) {
 		ctx.fillText("" + nodeText, this.n[i].x + 3, this.n[i].y + 4);
 	}
 };
-Shape.prototype.rotate_quarter = function (q) {
+
+Shape.prototype.rotateQuarter = function (q) {
 	this.n.forEach(function node(n) {
-		n.rotate_quarter(q);
+		n.rotateQuarter(q);
 	});
 };
-Shape.prototype.translate = function (v) {
+
+Shape.prototype.translate = function (translateVector) {
 	this.n.forEach(function node(n) {
-		n.translate(v.x, v.y);
+		n.add(translateVector);
 	});
 };
+
 Shape.prototype.asString = function () {
 	var logline = "";
 	this.n.forEach(function node(n) {

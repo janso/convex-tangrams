@@ -111,12 +111,14 @@ Figure.prototype.set_test = function () {
 
 Figure.prototype.toShape = function () {
 	// convert a figure (angle and edge length) to a shape (x,y) to draw it
-	var shape = new Shape(1, "#202020");
+	var shape = new Shape();
 	if (this.path.length == 0)
 		return shape;
+
 	var vangle = 0;
 	if (this.path[0] == "S")
 		vangle = 1;
+
 	var v = new Vector(0, 0);
 	for (var i = 1; i < this.path.length; i = i + 2) {
 		vangle = (vangle + 12 - this.path[i]) % 8;
@@ -296,18 +298,49 @@ Figure.combineQ3 = function (q3) {
 }
 
 Figure.drawQ3 = function (ctx, q3) {
+	var shapes = [];
 	var figure_combination = q3.split("+");
 	var first_block = figure_combination[0].split("@");
-	var figure = Figure.CreateFromCode(first_block[0]);
+	var previous_figure = Figure.CreateFromCode(first_block[0]);
+	var previous_shape = previous_figure.toShape();
 	var next_block;
 	var figure_index;
 	var next_figure;
 	var next_index;
+	shapes.push(previous_shape);
+
+	// iterate figures and create shapes
 	for (var i = 1; i < figure_combination.length; i++) {
 		next_block = figure_combination[i].split(".");
 		figure_index = parseInt(next_block[0]);
 		next_figure = Figure.CreateFromCode(next_block[1]);
 		next_index = parseInt(next_block[2]);
-		// ### draw with info figure_index, next_figure, next_index
+		// ### create shape and push it to "shapes"
 	}
+
+	// normalize shapes
+	var norm = new Vector(Number.MAX_SAFE_INTEGER, Number.MAX_SAFE_INTEGER);
+	shapes.forEach(function (shape) {
+		shape.n.forEach(function (node) {
+			if (node.x < norm.x)
+				norm.x = node.x;
+			if (node.y < norm.y)
+				norm.y = node.y;
+		})
+	});
+
+	// create a transformation matrix to transform shapes in a display-able format
+	var matrix = Matrix.getScale(32, 32);
+	//var matrix = Matrix.getTranslation(-norm.x, -norm.y);
+	//matrix.multiplyMatrix(Matrix.getTranslation(10, 10));
+	//matrix.multiplyMatrix(Matrix.getRotate(Math.PI + 0.085));
+		
+	// draw shapes on canvas
+	var lastShape;
+	shapes.forEach(function (shape) {
+		matrix.transformShape(shape);
+		shape.draw(ctx);
+		lastShape = shape;
+	})
+	lastShape.drawNodeIncription(ctx);
 }

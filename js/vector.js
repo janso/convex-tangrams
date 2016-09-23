@@ -28,7 +28,7 @@ Vector.prototype.asString = function () {
 	return "[" + this.x + "," + this.y + "]";
 };
 
-Vector.prototype.rotate_quarter = function (q) {
+Vector.prototype.rotateQuarter = function (q) {
 	var x,
 	lq = q % 3;
 	if (q == 1) {
@@ -43,11 +43,6 @@ Vector.prototype.rotate_quarter = function (q) {
 		this.x = -this.y;
 		this.y = x;
 	}
-}
-
-Vector.prototype.translate = function (x, y) {
-	this.x += x;
-	this.y += y;
 }
 
 Vector.prototype.get_angle = function () {
